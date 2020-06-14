@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.29613.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RaspberryIRDotNet", "RaspberryIRDotNet\RaspberryIRDotNet.csproj", "{F99BBFAA-F5A1-4C06-A158-187D0F81AF6C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RaspberryIRDotNetExamples", "RaspberryIRDotNet.Example\RaspberryIRDotNetExamples.csproj", "{D3B0D821-5E46-4C45-8900-10B0C9E530B8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RaspberryIRDotNetExamples", "RaspberryIRDotNetExamples\RaspberryIRDotNetExamples.csproj", "{D3B0D821-5E46-4C45-8900-10B0C9E530B8}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RaspberryIRDotNet.Tests.Unit", "RaspberryIRDotNet.Tests.Unit\RaspberryIRDotNet.Tests.Unit.csproj", "{985BCBEF-C87F-4124-8E4E-E8F43A804E59}"
 EndProject
