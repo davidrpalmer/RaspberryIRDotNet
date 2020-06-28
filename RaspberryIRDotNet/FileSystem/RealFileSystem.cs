@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Text;
 using Microsoft.Win32.SafeHandles;
 
 namespace RaspberryIRDotNet.FileSystem
@@ -13,7 +14,12 @@ namespace RaspberryIRDotNet.FileSystem
 
         public string GetRealPath(string linkPath)
         {
-            return Mono.Unix.UnixPath.GetRealPath(linkPath);
+            StringBuilder realPath = new StringBuilder();
+            if (Native.RealPath(linkPath, realPath) == 0)
+            {
+                ThrowLastNativeError();
+            }
+            return realPath.ToString();
         }
 
         public IOpenFile OpenRead(string path)
@@ -69,9 +75,14 @@ namespace RaspberryIRDotNet.FileSystem
         {
             if (returnCode < 0)
             {
-                int lastError = System.Runtime.InteropServices.Marshal.GetLastWin32Error();
-                throw new System.ComponentModel.Win32Exception(lastError); // The even though the name is Win32 this exception actually works for Linux and gives the right messages.
+                ThrowLastNativeError();
             }
+        }
+
+        private void ThrowLastNativeError()
+        {
+            int lastError = System.Runtime.InteropServices.Marshal.GetLastWin32Error();
+            throw new System.ComponentModel.Win32Exception(lastError); // The even though the name is Win32 this exception actually works for Linux and gives the right messages.
         }
     }
 }

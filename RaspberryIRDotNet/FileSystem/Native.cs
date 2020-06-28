@@ -14,5 +14,8 @@ namespace RaspberryIRDotNet.FileSystem
 
         [DllImport("libc", EntryPoint = "write", SetLastError = true)]
         public static extern int Write(SafeFileHandle handle, byte[] data, int length);
+
+        [DllImport("libc", EntryPoint = "realpath", SetLastError = true, CharSet = CharSet.Ansi, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+        public static extern int RealPath(string fileName, System.Text.StringBuilder resolvedName);
     }
 }
