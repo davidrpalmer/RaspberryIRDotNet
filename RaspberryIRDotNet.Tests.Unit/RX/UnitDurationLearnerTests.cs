@@ -142,15 +142,17 @@ namespace RaspberryIRDotNet.Tests.Unit.RX
 
         private RaspberryIRDotNet.RX.UnitDurationLearner NewUnitDurationLearner(FileSystem.IFileSystem fileSystem)
         {
-            var subject = new RaspberryIRDotNet.RX.UnitDurationLearner()
+            var pulseSpaceSource = new RaspberryIRDotNet.RX.PulseSpaceSource.PulseSpaceCaptureLirc(LircPath, fileSystem)
             {
-                CaptureDevice = LircPath,
+                ThrowOnUnknownPacket = true
+            };
+
+            var subject = new RaspberryIRDotNet.RX.UnitDurationLearner(pulseSpaceSource)
+            {
                 CaptureDelay = TimeSpan.Zero, // Make unit tests run faster
                 LeadInPatternDurations = new PulseSpaceDurationList() { 500, 400 },
                 TargetCaptures = 3,
-                ThrowOnUnknownPacket = true
             };
-            subject.SetFileSystem(fileSystem);
 
             return subject;
         }

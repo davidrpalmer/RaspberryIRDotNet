@@ -52,8 +52,8 @@ namespace RaspberryIRDotNet.Tests.Unit.TX
             var fileHandle = MakeMockFileHandle();
             var fileSystem = new Mock<FileSystem.IFileSystem>(MockBehavior.Strict);
 
-            fileSystem
-                .Setup(x => x.IoCtlReadUInt32(It.IsNotNull<FileSystem.IOpenFile>(), It.Is<uint>(arg => arg == LircConstants.LIRC_GET_FEATURES)))
+            fileHandle
+                .Setup(x => x.IoCtlReadUInt32(It.Is<uint>(arg => arg == LircConstants.LIRC_GET_FEATURES)))
                 .Returns(0);
             fileSystem
                 .Setup(x => x.OpenWrite(It.Is<string>(arg => arg == LircPath)))
@@ -72,8 +72,8 @@ namespace RaspberryIRDotNet.Tests.Unit.TX
         public void OpenClose()
         {
             // ARRANGE
-            var fileHandle = MakeMockFileHandle();
-            var fileSystem = MockFileSystem(fileHandle, (data) => throw new Exception("Should not write anything."));
+            var fileHandle = MakeMockFileHandle((data) => throw new Exception("Should not write anything."));
+            var fileSystem = MockFileSystem(fileHandle);
             var subject = MakeSubject(fileSystem.Object);
 
             // ACT, ASSERT
@@ -91,8 +91,8 @@ namespace RaspberryIRDotNet.Tests.Unit.TX
         public void OpenCloseOpenClose()
         {
             // ARRANGE
-            var fileHandle = MakeMockFileHandle();
-            var fileSystem = MockFileSystem(fileHandle, (data) => throw new Exception("Should not write anything."));
+            var fileHandle = MakeMockFileHandle((data) => throw new Exception("Should not write anything."));
+            var fileSystem = MockFileSystem(fileHandle);
             var subject = MakeSubject(fileSystem.Object);
 
             // ACT, ASSERT
@@ -118,8 +118,8 @@ namespace RaspberryIRDotNet.Tests.Unit.TX
         public void OpenDispose()
         {
             // ARRANGE
-            var fileHandle = MakeMockFileHandle();
-            var fileSystem = MockFileSystem(fileHandle, (data) => throw new Exception("Should not write anything."));
+            var fileHandle = MakeMockFileHandle((data) => throw new Exception("Should not write anything."));
+            var fileSystem = MockFileSystem(fileHandle);
             var subject = MakeSubject(fileSystem.Object);
 
             // ACT, ASSERT
@@ -137,8 +137,8 @@ namespace RaspberryIRDotNet.Tests.Unit.TX
         public void OpenCloseDispose()
         {
             // ARRANGE
-            var fileHandle = MakeMockFileHandle();
-            var fileSystem = MockFileSystem(fileHandle, (data) => throw new Exception("Should not write anything."));
+            var fileHandle = MakeMockFileHandle((data) => throw new Exception("Should not write anything."));
+            var fileSystem = MockFileSystem(fileHandle);
             var subject = MakeSubject(fileSystem.Object);
 
             // ACT, ASSERT
@@ -161,8 +161,8 @@ namespace RaspberryIRDotNet.Tests.Unit.TX
         {
             // ARRANGE
             List<byte[]> writtenData = new List<byte[]>();
-            var fileHandle = MakeMockFileHandle();
-            var fileSystem = MockFileSystem(fileHandle, (data) => writtenData.Add(data));
+            var fileHandle = MakeMockFileHandle((data) => writtenData.Add(data));
+            var fileSystem = MockFileSystem(fileHandle);
             var subject = MakeSubject(fileSystem.Object);
 
             // ACT
@@ -183,8 +183,8 @@ namespace RaspberryIRDotNet.Tests.Unit.TX
         {
             // ARRANGE
             List<byte[]> writtenData = new List<byte[]>();
-            var fileHandle = MakeMockFileHandle();
-            var fileSystem = MockFileSystem(fileHandle, (data) => writtenData.Add(data));
+            var fileHandle = MakeMockFileHandle((data) => writtenData.Add(data));
+            var fileSystem = MockFileSystem(fileHandle);
             var subject = MakeSubject(fileSystem.Object);
 
             // ACT

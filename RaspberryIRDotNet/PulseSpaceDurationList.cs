@@ -70,12 +70,33 @@ namespace RaspberryIRDotNet
         {
             return !IsSpace(index);
         }
+
+        public bool IsCloseTo(int index, int expected, int errorMargin)
+        {
+            return Math.Abs(this[index] - expected) <= errorMargin;
+        }
+
+        public bool IsWithinPercent(int index, int expected, double percentage)
+        {
+            if (percentage < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(percentage));
+            }
+
+            var errorMargin = (int) Math.Round(expected * percentage, 0);
+
+            return IsCloseTo(index, expected, errorMargin);
+        }
     }
 
     public interface IReadOnlyPulseSpaceDurationList : IReadOnlyList<int>
     {
         bool IsSpace(int index);
         bool IsPulse(int index);
+
+        bool IsCloseTo(int index, int expected, int errorMargin);
+
+        bool IsWithinPercent(int index, int expected, double percentage);
 
         PulseSpaceDurationList Copy();
         PulseSpaceDurationList Copy(int roundTo);

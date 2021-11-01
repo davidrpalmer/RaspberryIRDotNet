@@ -37,27 +37,35 @@ namespace RaspberryIRDotNet.RX
                 _minimumMatchingCaptures = value;
             }
         }
-        private int _minimumMatchingCaptures = 6;
+        private int _minimumMatchingCaptures = 4;
 
         /// <summary>
-        /// If this many non-matching captures are received then something is wrong, throw an error. Note this does not count noise, only captures that seem valid, but do not match the other captures.
+        /// If this many non-matching captures are received then something is wrong, throw an error.
         /// </summary>
-        public int ErrorAfterBadCaptureCount { get; set; } = 10;
+        /// <remarks>
+        /// Note this does not count noise, only captures that seem valid, but do not match the other captures.
+        /// If the IR signal changes (for example if it has a toggle bit) then there will need to be a large enough gab between
+        /// this and <see cref="MinimumMatchingCaptures"/>. Only one of the variations will be learnt.
+        /// </remarks>
+        public int ErrorAfterBadCaptureCount { get; set; } = 12;
 
         /// <summary>
-        /// Discount any signals that have fewer units than this.
+        /// Discount any signals that have fewer PULSEs and SPACEs than this. This is to filter out the shorter repeat patterns.
         /// </summary>
-        public int MessageMinimumUnitCount { get; set; } = 1;
-
-        /// <summary>
-        /// Discount any signals that have more units than this.
-        /// </summary>
-        public int MessageMaximumUnitCount { get; set; } = 500;
+        public int MinimumPulseSpaceCount { get; set; } = 8;
 
         /// <summary>
         /// Wait this long in between captures to allow the user time to let go of the button and get ready to press it again.
         /// </summary>
         public TimeSpan CaptureDelay { get; set; } = TimeSpan.FromSeconds(1);
+
+        /// <param name="captureDevicePath">The IR capture device, example '/dev/lirc0'.</param>
+        public IRMessageLearn(string captureDevicePath) : base(captureDevicePath)
+        {
+        }
+        public IRMessageLearn(PulseSpaceSource.IPulseSpaceSource source) : base(source)
+        {
+        }
 
         /// <summary>
         /// Learn an IR message and return it.
@@ -68,7 +76,7 @@ namespace RaspberryIRDotNet.RX
             while (true)
             {
                 Waiting?.Invoke(this, EventArgs.Empty);
-                allCaptues.Add(CaptureSingleMessage());
+                allCaptues.Add(CaptureSingleMessage(null));
                 Hit?.Invoke(this, EventArgs.Empty);
 
                 var chosenSample = CheckSamples(allCaptues);
@@ -95,34 +103,21 @@ namespace RaspberryIRDotNet.RX
                 return null; // Not got enough samples yet.
             }
 
-            ICollection<IRPulseMessage> bestSamples;
-            if (MessageMinimumUnitCount == MessageMaximumUnitCount)
+            if (allCaptues.Any(x => x.PulseSpaceCount < MinimumPulseSpaceCount))
             {
-                if (allCaptues.Any(x => x.UnitCount != MessageMinimumUnitCount))
-                {
-                    throw new Exception($"Only messages with {MessageMinimumUnitCount} units should have got into here.");
-                }
-
-                bestSamples = allCaptues;
+                throw new Exception($"Only messages with at least {MinimumPulseSpaceCount} PULSEs and SPACEs should have got into here.");
             }
-            else
+
+            ICollection<IRPulseMessage> bestSamples = allCaptues
+                .GroupBy(x => x.UnitCount) // Group by the number of units in the message.
+                .OrderByDescending(g => g.Count())
+                .First() // Get the most popular unit size and assume that is the right one.
+                .ToList();
+
+            if (bestSamples.Count < MinimumMatchingCaptures)
             {
-                if (allCaptues.Any(x => x.UnitCount < MessageMinimumUnitCount || x.UnitCount > MessageMaximumUnitCount))
-                {
-                    throw new Exception($"Only messages with {MessageMinimumUnitCount}-{MessageMaximumUnitCount} units should have got into here.");
-                }
-
-                bestSamples = allCaptues
-                    .GroupBy(x => x.UnitCount) // Group by the number of units in the message.
-                    .OrderByDescending(g => g.Count())
-                    .First() // Get the most popular unit size and assume that is the right one.
-                    .ToList();
-
-                if (bestSamples.Count < MinimumMatchingCaptures)
-                {
-                    // Not enough of the samples have the same number of units.
-                    return null;
-                }
+                // Not enough of the samples have the same number of units.
+                return null;
             }
 
             foreach (var sample in bestSamples)
@@ -163,9 +158,9 @@ namespace RaspberryIRDotNet.RX
 
         protected override bool CheckMessage(IRPulseMessage message)
         {
-            if (message.UnitCount < MessageMinimumUnitCount || message.UnitCount > MessageMaximumUnitCount)
+            if (message.PulseSpaceCount < MinimumPulseSpaceCount)
             {
-                // Wrong number of units, assume this is noise.
+                // Not enough PULSEs / SPACEs. Assume either a broken message or a repeat pattern, which we are not interested in.
                 return false;
             }
 

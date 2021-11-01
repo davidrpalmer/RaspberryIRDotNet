@@ -13,8 +13,8 @@ namespace RaspberryIRDotNet.Tests.Unit
             // ARRANGE
             var fileSystem = new Mock<FileSystem.IFileSystem>(MockBehavior.Strict);
             var fileHandle = new Mock<FileSystem.IOpenFile>(MockBehavior.Strict);
-            fileSystem
-                .Setup(x => x.IoCtlReadUInt32(It.Is<FileSystem.IOpenFile>(arg => arg == fileHandle.Object), It.Is<uint>(arg => arg == LircConstants.LIRC_GET_FEATURES)))
+            fileHandle
+                .Setup(x => x.IoCtlReadUInt32(It.Is<uint>(arg => arg == LircConstants.LIRC_GET_FEATURES)))
                 .Returns((uint)(DeviceFeatures.ReceiveModeMode2 | DeviceFeatures.SetSendCarrier));
 
             var utility = new Utility(fileSystem.Object);
@@ -33,8 +33,8 @@ namespace RaspberryIRDotNet.Tests.Unit
             // ARRANGE
             var fileSystem = new Mock<FileSystem.IFileSystem>(MockBehavior.Strict);
             var fileHandle = new Mock<FileSystem.IOpenFile>(MockBehavior.Strict);
-            fileSystem
-                .Setup(x => x.IoCtlReadUInt32(It.Is<FileSystem.IOpenFile>(arg => arg == fileHandle.Object), It.Is<uint>(arg => arg == LircConstants.LIRC_GET_FEATURES)))
+            fileHandle
+                .Setup(x => x.IoCtlReadUInt32(It.Is<uint>(arg => arg == LircConstants.LIRC_GET_FEATURES)))
                 .Throws(new Win32Exception(LinuxErrorCodes.ENOTTY)); // This exception code means we don't support the IOCTL request here.
 
             var utility = new Utility(fileSystem.Object);
@@ -50,8 +50,8 @@ namespace RaspberryIRDotNet.Tests.Unit
             const int errorCode = 500; // Just make up a code here that should not be handled by anything else.
             var fileSystem = new Mock<FileSystem.IFileSystem>(MockBehavior.Strict);
             var fileHandle = new Mock<FileSystem.IOpenFile>(MockBehavior.Strict);
-            fileSystem
-                .Setup(x => x.IoCtlReadUInt32(It.Is<FileSystem.IOpenFile>(arg => arg == fileHandle.Object), It.Is<uint>(arg => arg == LircConstants.LIRC_GET_FEATURES)))
+            fileHandle
+                .Setup(x => x.IoCtlReadUInt32(It.Is<uint>(arg => arg == LircConstants.LIRC_GET_FEATURES)))
                 .Throws(new Win32Exception(errorCode));
 
             var utility = new Utility(fileSystem.Object);
@@ -83,8 +83,7 @@ namespace RaspberryIRDotNet.Tests.Unit
             // ARRANGE
             var fileSystem = new Mock<FileSystem.IFileSystem>(MockBehavior.Strict);
             var fileHandle = new Mock<FileSystem.IOpenFile>(MockBehavior.Strict);
-            fileSystem.Setup(x => x.IoCtlWrite(
-                    It.Is<FileSystem.IOpenFile>(arg => arg == fileHandle.Object),
+            fileHandle.Setup(x => x.IoCtlWrite(
                     It.Is<uint>(arg => arg == LircConstants.LIRC_SET_REC_TIMEOUT),
                     It.Is<uint>(arg => arg == input)
                     ));
@@ -95,7 +94,7 @@ namespace RaspberryIRDotNet.Tests.Unit
             utility.SetRxTimeout(fileHandle.Object, input);
 
             // ASSERT
-            fileSystem.Verify(x => x.IoCtlWrite(It.IsAny<FileSystem.IOpenFile>(), It.IsAny<uint>(), It.IsAny<uint>()), Times.Once);
+            fileHandle.Verify(x => x.IoCtlWrite(It.IsAny<uint>(), It.IsAny<uint>()), Times.Once);
         }
 
         [Test]
@@ -108,8 +107,7 @@ namespace RaspberryIRDotNet.Tests.Unit
             // ARRANGE
             var fileSystem = new Mock<FileSystem.IFileSystem>(MockBehavior.Strict);
             var fileHandle = new Mock<FileSystem.IOpenFile>(MockBehavior.Strict);
-            fileSystem.Setup(x => x.IoCtlWrite(
-                    It.Is<FileSystem.IOpenFile>(arg => arg == fileHandle.Object),
+            fileHandle.Setup(x => x.IoCtlWrite(
                     It.Is<uint>(arg => arg == LircConstants.LIRC_SET_REC_TIMEOUT),
                     It.Is<uint>(arg => arg == input)
                     ));
@@ -120,7 +118,7 @@ namespace RaspberryIRDotNet.Tests.Unit
             utility.SetRxTimeout(fileHandle.Object, input);
 
             // ASSERT
-            fileSystem.Verify(x => x.IoCtlWrite(It.IsAny<FileSystem.IOpenFile>(), It.IsAny<uint>(), It.IsAny<uint>()), Times.Once);
+            fileHandle.Verify(x => x.IoCtlWrite(It.IsAny<uint>(), It.IsAny<uint>()), Times.Once);
         }
 
         [Test]

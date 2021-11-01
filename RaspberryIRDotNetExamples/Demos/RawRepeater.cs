@@ -30,11 +30,8 @@ namespace RaspberryIRDotNetExamples.Demos
             {
                 TransmissionDevice = DemoConfig.GetTxDevice()
             };
-            var receiver = new Receiver()
-            {
-                CaptureDevice = DemoConfig.GetRxDevice(),
-                OnRx = OnRx
-            };
+            var receiver = new RaspberryIRDotNet.RX.PulseSpaceSource.PulseSpaceCaptureLirc(DemoConfig.GetRxDevice());
+            receiver.ReceivedPulseSpaceBurst += OnRx;
 
             Console.WriteLine();
             Console.WriteLine();
@@ -42,14 +39,14 @@ namespace RaspberryIRDotNetExamples.Demos
             Console.WriteLine();
             Console.WriteLine();
             _sender.Open();
-            receiver.Start();
+            receiver.Capture(null);
         }
 
-        private void OnRx(RaspberryIRDotNet.IReadOnlyPulseSpaceDurationList buffer)
+        private void OnRx(object s, RaspberryIRDotNet.RX.PulseSpaceSource.ReceivedPulseSpaceBurstEventArgs e)
         {
             if (_roundTo.HasValue)
             {
-                var roundedBuffer = buffer.Copy(_roundTo.Value);
+                var roundedBuffer = e.Buffer.Copy(_roundTo.Value);
                 if (roundedBuffer.Any(x => x <= 0))
                 {
                     /// The rounding process has produced a zero. Either <see cref="_roundTo"/> has been set to the wrong value, or this was background noise.
@@ -57,9 +54,12 @@ namespace RaspberryIRDotNetExamples.Demos
                     Console.Write("-");
                     return;
                 }
-                _sender.Send(buffer.Copy(_roundTo.Value));
+                _sender.Send(roundedBuffer);
             }
-            _sender.Send(buffer);
+            else
+            {
+                _sender.Send(e.Buffer);
+            }
             Console.Write("+");
         }
 
@@ -71,22 +71,6 @@ namespace RaspberryIRDotNetExamples.Demos
                 return null;
             }
             return int.Parse(str);
-        }
-
-        class Receiver : RaspberryIRDotNet.RX.PulseSpaceCapture
-        {
-            public Action<RaspberryIRDotNet.IReadOnlyPulseSpaceDurationList> OnRx { get; set; }
-
-            protected override bool OnReceivePulseSpaceBlock(RaspberryIRDotNet.PulseSpaceDurationList buffer)
-            {
-                OnRx(buffer);
-                return true;
-            }
-
-            public void Start()
-            {
-                CaptureFromDevice();
-            }
         }
     }
 }

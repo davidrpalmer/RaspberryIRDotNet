@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using RaspberryIRDotNet.RX.PulseSpaceSource;
 
 namespace RaspberryIRDotNet.RX
 {
@@ -14,18 +15,26 @@ namespace RaspberryIRDotNet.RX
         /// </summary>
         public Action<string> ConsoleWriteLine { get; set; } = Console.WriteLine;
 
-        protected override bool OnReceiveIRPulseMessage(PulseSpaceDurationList rawDataBuffer, IRPulseMessage message)
+        /// <param name="captureDevicePath">The IR capture device, example '/dev/lirc0'.</param>
+        public FilteredPulseSpaceConsoleWriter(string captureDevicePath) : base(captureDevicePath)
+        {
+        }
+        public FilteredPulseSpaceConsoleWriter(IPulseSpaceSource source) : base(source)
+        {
+        }
+
+        protected override void OnReceiveIRPulseMessage(ReceivedPulseSpaceBurstEventArgs rawData, IRPulseMessage message)
         {
             if (CheckMessage(message))
             {
                 bool pulse = true; // or space.
 
-                if (rawDataBuffer.Count != message.PulseSpaceDurations.Count)
+                if (rawData.Buffer.Count != message.PulseSpaceDurations.Count)
                 {
                     throw new Exception("These should be the same length.");
                 }
 
-                var merged = rawDataBuffer
+                var merged = rawData.Buffer
                     .Zip(message.PulseSpaceDurations, (r, m) => new { Raw = r, Clean = m })
                     .Zip(message.PulseSpaceUnits, (durations, units) => new { Raw = durations.Raw, Clean = durations.Clean, Units = units });
 
@@ -39,26 +48,14 @@ namespace RaspberryIRDotNet.RX
                 }
                 ConsoleWriteLine($"----------------------   UnitCount:{message.UnitCount}");
             }
-
-            return true;
         }
 
         /// <summary>
         /// Start logging to the console.
         /// </summary>
-        public void Start()
+        public void Start(ReadCancellationToken cancellationToken)
         {
-            CaptureFromDevice();
-        }
-
-        /// <summary>
-        /// Stop the logging whenever possible, however it may be some time before the thread actually stops, if it ever stops.
-        /// 
-        /// Think of this as more of a notification that the logging is no longer needed and it MAY stop, rather than an instruction that it MUST stop.
-        /// </summary>
-        public void StopWhenPossible()
-        {
-            CancelReceiveWhenPossible();
+            Capture(cancellationToken);
         }
     }
 }

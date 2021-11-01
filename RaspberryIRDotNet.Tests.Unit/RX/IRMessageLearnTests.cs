@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Moq;
 using NUnit.Framework;
 
@@ -51,13 +50,13 @@ namespace RaspberryIRDotNet.Tests.Unit.RX
         };
 
         private readonly int[] _goodSignalB2 = new int[]
-{
+        {
             510, //P5
             405, //S9
             180, // P11
             195, // S13
             240, // P15
-};
+        };
 
         private readonly int[] _badSignal1 = new int[]
         {
@@ -91,41 +90,46 @@ namespace RaspberryIRDotNet.Tests.Unit.RX
         };
 
 
-        private readonly int[] _noise_WrongLength = new int[]
+        private readonly int[] _noise_TooFewPulseSpaces = new int[]
         {
-            530, //P5
-            377, //P9
-            145, // P10
-            55, // S11
+            530, //P
+            377, //S
+            145, //P
+        };
+
+        private readonly int[] _noise_VeryShort = new int[]
+        {
+            530,
         };
 
         private readonly int[] _noise_WrongLeadIn = new int[]
         {
-            104, //P5
-            970, //P9
-            145, // P10
-            55, // S11
-            220, // P13
-            105, // S14
-            100 // P15
+            104, //P
+            970, //S
+            145, //P
+            55, //S
+            220, //P
+            105, //S
+            100 //P
         };
 
 
         private RaspberryIRDotNet.RX.IRMessageLearn NewIRMessageLearn(FileSystem.IFileSystem fileSystem)
         {
-            var subject = new RaspberryIRDotNet.RX.IRMessageLearn()
+            var pulseSpaceSource = new RaspberryIRDotNet.RX.PulseSpaceSource.PulseSpaceCaptureLirc(LircPath, fileSystem)
             {
-                CaptureDevice = LircPath,
-                CaptureDelay = TimeSpan.Zero,
-                LeadInPattern = new PulseSpaceUnitList() { 5, 4 },
-                UnitDurationMicrosecs = 100,
-                MessageMinimumUnitCount = 15,
-                MessageMaximumUnitCount = 15,
-                MinimumMatchingCaptures = 3,
-                ErrorAfterBadCaptureCount = 5,
                 ThrowOnUnknownPacket = true
             };
-            subject.SetFileSystem(fileSystem);
+
+            var subject = new RaspberryIRDotNet.RX.IRMessageLearn(pulseSpaceSource)
+            {
+                CaptureDelay = TimeSpan.Zero,
+                UnitDurationMicrosecs = 100,
+                MinimumPulseSpaceCount = 4,
+                MinimumMatchingCaptures = 3,
+                ErrorAfterBadCaptureCount = 5,
+            };
+            subject.SetLeadInPatternFilterByUnits(new PulseSpaceUnitList() { 5, 4 });
             return subject;
         }
 
@@ -146,7 +150,7 @@ namespace RaspberryIRDotNet.Tests.Unit.RX
             var fileHandles = new List<Mock<FileSystem.IOpenFile>>();
             fileHandles.Add(MakeMockFileHandle(_goodSignal1));
             fileHandles.Add(MakeMockFileHandle(_noise_WrongLeadIn, _goodSignal2));
-            fileHandles.Add(MakeMockFileHandle(_noise_WrongLength, _goodSignal3));
+            fileHandles.Add(MakeMockFileHandle(_noise_TooFewPulseSpaces, _goodSignal3));
 
             LearnMessage(fileHandles, 3, 2);
         }
@@ -156,8 +160,8 @@ namespace RaspberryIRDotNet.Tests.Unit.RX
         {
             var fileHandles = new List<Mock<FileSystem.IOpenFile>>();
             fileHandles.Add(MakeMockFileHandle(_noise_WrongLeadIn, _goodSignal1, _noise_WrongLeadIn, _noise_WrongLeadIn, _noise_WrongLeadIn, _noise_WrongLeadIn));
-            fileHandles.Add(MakeMockFileHandle(_noise_WrongLength, _noise_WrongLength, _noise_WrongLength, _noise_WrongLength, _noise_WrongLength, _goodSignal2));
-            fileHandles.Add(MakeMockFileHandle(_noise_WrongLength, _goodSignal3));
+            fileHandles.Add(MakeMockFileHandle(_noise_TooFewPulseSpaces, _noise_VeryShort, _noise_TooFewPulseSpaces, _noise_VeryShort, _noise_TooFewPulseSpaces, _goodSignal2));
+            fileHandles.Add(MakeMockFileHandle(_noise_TooFewPulseSpaces, _goodSignal3));
 
             LearnMessage(fileHandles, 3, 7);
         }
@@ -185,6 +189,19 @@ namespace RaspberryIRDotNet.Tests.Unit.RX
             fileHandles.Add(MakeMockFileHandle(_goodSignal3));
 
             LearnMessage(fileHandles, 5, 0);
+        }
+
+        [Test]
+        public void LearnMessage_ToggleBit()
+        {
+            var fileHandles = new List<Mock<FileSystem.IOpenFile>>();
+            fileHandles.Add(MakeMockFileHandle(_noise_WrongLeadIn, _goodSignal1));
+            fileHandles.Add(MakeMockFileHandle(_noise_TooFewPulseSpaces, _goodSignalB1));
+            fileHandles.Add(MakeMockFileHandle(_noise_TooFewPulseSpaces, _goodSignal2));
+            fileHandles.Add(MakeMockFileHandle(_noise_TooFewPulseSpaces, _goodSignalB2));
+            fileHandles.Add(MakeMockFileHandle(_goodSignal3));
+
+            LearnMessage(fileHandles, 5, 4);
         }
 
         private void LearnMessage(List<Mock<FileSystem.IOpenFile>> fileHandles, int expectedHit, int expectedMiss)
@@ -269,8 +286,8 @@ namespace RaspberryIRDotNet.Tests.Unit.RX
             var fileHandle = MakeMockFileHandle();
             var fileSystem = new Mock<FileSystem.IFileSystem>(MockBehavior.Strict);
 
-            fileSystem
-                .Setup(x => x.IoCtlReadUInt32(It.IsNotNull<FileSystem.IOpenFile>(), It.Is<uint>(arg => arg == LircConstants.LIRC_GET_FEATURES)))
+            fileHandle
+                .Setup(x => x.IoCtlReadUInt32(It.Is<uint>(arg => arg == LircConstants.LIRC_GET_FEATURES)))
                 .Returns((uint)DeviceFeatures.SendModePulse);
             fileSystem
                 .Setup(x => x.OpenRead(It.Is<string>(arg => arg == LircPath)))

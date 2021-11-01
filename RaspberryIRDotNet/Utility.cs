@@ -46,7 +46,7 @@ namespace RaspberryIRDotNet
         {
             try
             {
-                _fileSystem.IoCtlWrite(file, LircConstants.LIRC_SET_REC_TIMEOUT, timeoutMicrosecs);
+                file.IoCtlWrite(LircConstants.LIRC_SET_REC_TIMEOUT, timeoutMicrosecs);
             }
             catch (System.ComponentModel.Win32Exception err)
             {
@@ -58,7 +58,7 @@ namespace RaspberryIRDotNet
         {
             try
             {
-                return (DeviceFeatures)_fileSystem.IoCtlReadUInt32(file, LircConstants.LIRC_GET_FEATURES);
+                return (DeviceFeatures)file.IoCtlReadUInt32(LircConstants.LIRC_GET_FEATURES);
             }
             catch (System.ComponentModel.Win32Exception err) when (err.NativeErrorCode == LinuxErrorCodes.ENOTTY)
             {

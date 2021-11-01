@@ -60,7 +60,7 @@ namespace RaspberryIRDotNet.DeviceAssessment
         {
             try
             {
-                return _fileSystem.IoCtlReadUInt32(irDevice, requestCode);
+                return irDevice.IoCtlReadUInt32(requestCode);
             }
             catch (System.ComponentModel.Win32Exception err) when (err.NativeErrorCode == ENOSYS || err.NativeErrorCode == ENOTTY)
             {

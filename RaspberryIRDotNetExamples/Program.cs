@@ -10,9 +10,11 @@ namespace RaspberryIRDotNetExamples
             new IRDevListing(),
             new ScopeToy(),
             new RXLogger(),
+            new TextScopeLogger(),
             new RawRepeater(),
             new FixedDataSender(),
             new LearnAKey(),
+            new LogDecodedPackets(),
         };
 
         static void Main(string[] args)

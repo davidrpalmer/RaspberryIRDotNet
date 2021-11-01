@@ -24,6 +24,14 @@ The solution and project files are setup for building with Visual Studio 2019. U
 
 Run the `RaspberryIRDotNetExamples` console app (you may need to `chmod u+x RaspberryIRDotNetExamples`). This project will demo some of the functionality of the `RaspberryIRDotNet` library. Take a look at it's source code to see how the console app makes use of the library.
 
+## Supported Formats
+ * NEC (basic and extended)
+ * RC5 (basic and extended)
+ * RC6
+   * Mode 0
+   * Mode 6A - 8bit and 16bit address modes are supported. However the payload format is not defined in this standard. So you will either have to just take the payload as raw bits, or add your own class to decode it. The `Xbox360Packet` and `Xbox360Converter` classes show how this can be done.
+ * Kasiekyo (Panasonic only)
+
 
 ## Room for Improvement
-This library does not decode the pulses and spaces of light to bytes/hexadecimal, it simply stores it as the durations of PULSE/SPACE (on/off) time (e.g. `300μs on, 600μs off, 100μs on, etc`). For record and playback of IR codes this is fine, however it is currently not possible to type in the hex codes for an IR remote and send them.
+When decoding raw IR into a formatted message standard, such as NEC, this library does not handle repeat codes.

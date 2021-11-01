@@ -1,4 +1,5 @@
 ﻿using System;
+using RaspberryIRDotNet.RX.PulseSpaceSource;
 
 namespace RaspberryIRDotNet.RX
 {
@@ -6,17 +7,33 @@ namespace RaspberryIRDotNet.RX
     /// Write the output from the IR device to the console.
     /// Basically does the same thing as the "ir-ctl -r" command.
     /// </summary>
-    public class PulseSpaceConsoleWriter : PulseSpaceCapture, IIRConsoleWriter
+    public class PulseSpaceConsoleWriter : IIRConsoleWriter
     {
         /// <summary>
         /// Option to override where the output is written to.
         /// </summary>
         public Action<string> ConsoleWriteLine { get; set; } = Console.WriteLine;
 
-        protected override bool OnReceivePulseSpaceBlock(PulseSpaceDurationList buffer)
+        private readonly IPulseSpaceSource _captureSource;
+
+        /// <param name="captureDevicePath">The IR capture device, example '/dev/lirc0'.</param>
+        public PulseSpaceConsoleWriter(string captureDevicePath) : this(new PulseSpaceCaptureLirc(captureDevicePath))
+        {
+            if (string.IsNullOrWhiteSpace(captureDevicePath))
+            {
+                throw new ArgumentNullException(nameof(captureDevicePath));
+            }
+        }
+        public PulseSpaceConsoleWriter(IPulseSpaceSource source)
+        {
+            _captureSource = source ?? throw new ArgumentNullException(nameof(source));
+            _captureSource.ReceivedPulseSpaceBurst += ReceivedPulseSpaceBurst;
+        }
+
+        private void ReceivedPulseSpaceBurst(object sender, ReceivedPulseSpaceBurstEventArgs e)
         {
             bool pulse = true; // or space.
-            foreach (int item in buffer)
+            foreach (int item in e.Buffer)
             {
                 string type = pulse ? "PULSE" : "SPACE";
 
@@ -25,25 +42,14 @@ namespace RaspberryIRDotNet.RX
                 pulse = !pulse;
             }
             ConsoleWriteLine("----------------------");
-            return true;
         }
 
         /// <summary>
         /// Start logging to the console.
         /// </summary>
-        public void Start()
+        public void Start(ReadCancellationToken cancellationToken)
         {
-            CaptureFromDevice();
-        }
-
-        /// <summary>
-        /// Stop the logging whenever possible, however it may be some time before the thread actually stops, if it ever stops.
-        /// 
-        /// Think of this as more of a notification that the logging is no longer needed and it MAY stop, rather than an instruction that it MUST stop.
-        /// </summary>
-        public void StopWhenPossible()
-        {
-            CancelReceiveWhenPossible();
+            _captureSource.Capture(cancellationToken);
         }
     }
 }

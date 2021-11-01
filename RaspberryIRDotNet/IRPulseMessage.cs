@@ -27,6 +27,11 @@ namespace RaspberryIRDotNet
         public int UnitCount { get; }
 
         /// <summary>
+        /// How many PULSEs and SPACEs are in this message. For example a message that goes PULSE,SPACE,PULSE would be 3.
+        /// </summary>
+        public int PulseSpaceCount { get; }
+
+        /// <summary>
         /// How long each unit lasts for, in microseconds.
         /// </summary>
         public int UnitDuration { get; }
@@ -50,6 +55,7 @@ namespace RaspberryIRDotNet
 
             _units = new PulseSpaceUnitList(unitDuration, pulsesAndSpacesAsDurations);
             UnitCount = _units.UnitCount;
+            PulseSpaceCount = _units.Count;
         }
 
         /// <param name="pulsesAndSpacesAsNumberOfUnits">Each item represents a PULSE or a SPACE. Each value represents the number of units.</param>
@@ -83,6 +89,7 @@ namespace RaspberryIRDotNet
             _durations = new PulseSpaceDurationList(unitDuration, pulsesAndSpacesAsNumberOfUnits);
 
             UnitCount = _units.UnitCount;
+            PulseSpaceCount = _units.Count;
         }
     }
 }

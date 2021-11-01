@@ -7,7 +7,7 @@
     <Product>RaspberryIRDotNet</Product>
     <Authors>David Palmer</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <Copyright>Copyright (c) 2020 David Palmer</Copyright>
+    <Copyright>Copyright (c) 2021 David Palmer</Copyright>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

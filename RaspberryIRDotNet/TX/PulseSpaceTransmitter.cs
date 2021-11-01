@@ -42,7 +42,7 @@ namespace RaspberryIRDotNet.TX
             byte[] txBytesBuffer = GetTxBytes(buffer);
             try
             {
-                _fileSystem.WriteToDevice(file, txBytesBuffer);
+                file.WriteToDevice(txBytesBuffer);
             }
             catch (System.ComponentModel.Win32Exception err) when (err.NativeErrorCode == LinuxErrorCodes.EINVAL)
             {
@@ -93,9 +93,13 @@ namespace RaspberryIRDotNet.TX
             int i = 0;
             foreach (int packet in buffer)
             {
-                if (packet <= 0)
+                if (packet < Utility.UnitDurationMinimum)
                 {
-                    throw new InvalidPulseSpaceDataException("TX buffer contains invalid data, duration cannot be zero or less.");
+                    throw new InvalidPulseSpaceDataException("TX buffer contains invalid data, duration is too short.");
+                }
+                if (packet > Utility.UnitDurationMaximum)
+                {
+                    throw new InvalidPulseSpaceDataException("TX buffer contains invalid data, duration is too long.");
                 }
 
                 Array.Copy(BitConverter.GetBytes(packet), 0, result, i, bytesIn32BitInt);
@@ -121,13 +125,13 @@ namespace RaspberryIRDotNet.TX
                 throw new NotSupportedException("Only PULSE mode is supported for sending, but this device does not support PULSE.");
             }
 
-            uint sendMode = _fileSystem.IoCtlReadUInt32(irDevice, LircConstants.LIRC_GET_SEND_MODE);
+            uint sendMode = irDevice.IoCtlReadUInt32(LircConstants.LIRC_GET_SEND_MODE);
             if (sendMode != LircConstants.LIRC_MODE_PULSE)
             {
                 // The Raspberry Pi only supports PULSE mode and so it is the default mode, but incase that changes got the option to set the mode.
                 try
                 {
-                    _fileSystem.IoCtlWrite(irDevice, LircConstants.LIRC_SET_SEND_MODE, LircConstants.LIRC_MODE_PULSE);
+                    irDevice.IoCtlWrite(LircConstants.LIRC_SET_SEND_MODE, LircConstants.LIRC_MODE_PULSE);
                 }
                 catch (System.ComponentModel.Win32Exception err)
                 {
@@ -161,7 +165,7 @@ namespace RaspberryIRDotNet.TX
         {
             try
             {
-                _fileSystem.IoCtlWrite(irDevice, LircConstants.LIRC_SET_SEND_DUTY_CYCLE, cycle);
+                irDevice.IoCtlWrite(LircConstants.LIRC_SET_SEND_DUTY_CYCLE, cycle);
             }
             catch (System.ComponentModel.Win32Exception err)
             {
@@ -178,7 +182,7 @@ namespace RaspberryIRDotNet.TX
         {
             try
             {
-                _fileSystem.IoCtlWrite(irDevice, LircConstants.LIRC_SET_SEND_CARRIER, frequency);
+                irDevice.IoCtlWrite(LircConstants.LIRC_SET_SEND_CARRIER, frequency);
             }
             catch (System.ComponentModel.Win32Exception err)
             {

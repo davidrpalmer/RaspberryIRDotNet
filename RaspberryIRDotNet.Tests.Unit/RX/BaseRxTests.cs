@@ -41,8 +41,37 @@ namespace RaspberryIRDotNet.Tests.Unit.RX
 
             var fileHandle = new Mock<FileSystem.IOpenFile>(MockBehavior.Strict);
             fileHandle.Setup(x => x.Dispose());
-            fileHandle.SetupGet(x => x.Stream).Returns(new System.IO.MemoryStream(readBuffer.ToArray()));
+            fileHandle
+                .Setup(x => x.IoCtlReadUInt32(It.Is<uint>(arg => arg == LircConstants.LIRC_GET_FEATURES)))
+                .Returns((uint)DeviceFeatures.ReceiveModeMode2);
+            fileHandle
+                .Setup(x => x.IoCtlReadUInt32(It.Is<uint>(arg => arg == LircConstants.LIRC_GET_REC_MODE)))
+                .Returns(LircConstants.LIRC_MODE_MODE2);
+
+            ReadFromDeviceMockHelper readHelper = new ReadFromDeviceMockHelper(readBuffer);
+            fileHandle.Setup(x => x.ReadFromDevice(It.IsNotNull<byte[]>(), It.IsAny<ReadCancellationToken>()))
+                .Returns<byte[], ReadCancellationToken>(readHelper.DoNextRead);
+
             return fileHandle;
+        }
+
+        class ReadFromDeviceMockHelper
+        {
+            private readonly List<byte> _readBuffer = new List<byte>();
+
+            private int _nextIndex = 0;
+
+            public ReadFromDeviceMockHelper(List<byte> readBuffer)
+            {
+                _readBuffer = readBuffer ?? throw new ArgumentNullException(nameof(readBuffer));
+            }
+
+            public int DoNextRead(byte[] buffer, ReadCancellationToken cancellationToken)
+            {
+                _readBuffer.CopyTo(_nextIndex, buffer, 0, buffer.Length);
+                _nextIndex += buffer.Length;
+                return buffer.Length;
+            }
         }
 
 
@@ -50,12 +79,6 @@ namespace RaspberryIRDotNet.Tests.Unit.RX
         {
             var fileSystem = new Mock<FileSystem.IFileSystem>(MockBehavior.Strict);
 
-            fileSystem
-                .Setup(x => x.IoCtlReadUInt32(It.IsNotNull<FileSystem.IOpenFile>(), It.Is<uint>(arg => arg == LircConstants.LIRC_GET_FEATURES)))
-                .Returns((uint)DeviceFeatures.ReceiveModeMode2);
-            fileSystem
-                .Setup(x => x.IoCtlReadUInt32(It.IsNotNull<FileSystem.IOpenFile>(), It.Is<uint>(arg => arg == LircConstants.LIRC_GET_REC_MODE)))
-                .Returns(LircConstants.LIRC_MODE_MODE2);
             fileSystem
                 .Setup(x => x.OpenRead(It.Is<string>(arg => arg == LircPath)))
                 .Returns(new Queue<FileSystem.IOpenFile>(fileHandles.Select(x => x.Object)).Dequeue);

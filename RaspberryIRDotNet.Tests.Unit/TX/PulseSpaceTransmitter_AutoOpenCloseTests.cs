@@ -36,9 +36,10 @@ namespace RaspberryIRDotNet.Tests.Unit.TX
             var fileHandle = MakeMockFileHandle();
             var fileSystem = new Mock<FileSystem.IFileSystem>(MockBehavior.Strict);
 
-            fileSystem
-                .Setup(x => x.IoCtlReadUInt32(It.IsNotNull<FileSystem.IOpenFile>(), It.Is<uint>(arg => arg == LircConstants.LIRC_GET_FEATURES)))
+            fileHandle
+                .Setup(x => x.IoCtlReadUInt32(It.Is<uint>(arg => arg == LircConstants.LIRC_GET_FEATURES)))
                 .Returns((uint)DeviceFeatures.ReceiveModeMode2);
+
             fileSystem
                 .Setup(x => x.OpenWrite(It.Is<string>(arg => arg == LircPath)))
                 .Returns(fileHandle.Object);
@@ -57,8 +58,8 @@ namespace RaspberryIRDotNet.Tests.Unit.TX
         {
             // ARRANGE
             List<byte[]> writtenData = new List<byte[]>();
-            var fileHandle = MakeMockFileHandle();
-            var fileSystem = MockFileSystem(fileHandle, (data) => writtenData.Add(data));
+            var fileHandle = MakeMockFileHandle((data) => writtenData.Add(data));
+            var fileSystem = MockFileSystem(fileHandle);
             var subject = MakeSubject(fileSystem.Object);
 
             // ACT
@@ -77,8 +78,8 @@ namespace RaspberryIRDotNet.Tests.Unit.TX
         {
             // ARRANGE
             List<byte[]> writtenData = new List<byte[]>();
-            var fileHandle = MakeMockFileHandle();
-            var fileSystem = MockFileSystem(fileHandle, (data) => writtenData.Add(data));
+            var fileHandle = MakeMockFileHandle((data) => writtenData.Add(data));
+            var fileSystem = MockFileSystem(fileHandle);
             var subject = MakeSubject(fileSystem.Object);
 
             // ACT

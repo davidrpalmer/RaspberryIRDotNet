@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using RaspberryIRDotNet.RX.PulseSpaceSource;
 
 namespace RaspberryIRDotNet.RX
 {
-    public class UnitDurationLearner : PulseSpaceCapture, IMultipleCapture
+    public class UnitDurationLearner : IMultipleCapture
     {
         private PulseSpaceDurationList _lastReceived;
 
@@ -32,7 +33,10 @@ namespace RaspberryIRDotNet.RX
         /// <summary>
         /// IR noise got in the way of a capture.
         /// </summary>
-        public event EventHandler Miss;
+        /// <remarks>
+        /// Setting <see cref="ReceivedPulseSpaceBurstEventArgs.StopCapture"/> to TRUE will raise an <see cref="OperationCanceledException"/> in <see cref="LearnUnitDuration"/>.
+        /// </remarks>
+        public event EventHandler<ReceivedPulseSpaceBurstEventArgs> Miss;
 
         /// <summary>
         /// How many keys should be captured before results are returned.
@@ -44,25 +48,41 @@ namespace RaspberryIRDotNet.RX
         /// </summary>
         public TimeSpan CaptureDelay { get; set; } = TimeSpan.FromSeconds(1);
 
-        protected override bool OnReceivePulseSpaceBlock(PulseSpaceDurationList buffer)
+        private readonly IPulseSpaceSource _captureSource;
+
+        /// <param name="captureDevicePath">The IR capture device, example '/dev/lirc0'.</param>
+        public UnitDurationLearner(string captureDevicePath) : this(new PulseSpaceCaptureLirc(captureDevicePath))
         {
-            if (buffer.Count < (LeadInPatternDurations.Count + 5))
+            if (string.IsNullOrWhiteSpace(captureDevicePath))
             {
-                return true;
+                throw new ArgumentNullException(nameof(captureDevicePath));
+            }
+        }
+        public UnitDurationLearner(IPulseSpaceSource source)
+        {
+            _captureSource = source ?? throw new ArgumentNullException(nameof(source));
+            _captureSource.ReceivedPulseSpaceBurst += ReceivedPulseSpaceBurst;
+        }
+
+        private void ReceivedPulseSpaceBurst(object sender, ReceivedPulseSpaceBurstEventArgs e)
+        {
+            if (e.Buffer.Count < (LeadInPatternDurations.Count + 5))
+            {
+                return;
             }
 
             for (int i = 0; i < LeadInPatternDurations.Count; i++)
             {
                 const int errorMagin = 100;
-                if (buffer[i] < (LeadInPatternDurations[i] - errorMagin) || buffer[i] > (LeadInPatternDurations[i] + errorMagin))
+                if (e.Buffer[i] < (LeadInPatternDurations[i] - errorMagin) || e.Buffer[i] > (LeadInPatternDurations[i] + errorMagin))
                 {
-                    Miss?.Invoke(this, EventArgs.Empty);
-                    return true; // Wrong pattern, discard this IR message.
+                    Miss?.Invoke(this, e);
+                    return; // Wrong pattern, discard this IR message.
                 }
             }
 
-            _lastReceived = buffer.Copy();
-            return false;
+            _lastReceived = e.Buffer.Copy();
+            e.StopCapture = true;
         }
 
         public int LearnUnitDuration()
@@ -96,14 +116,15 @@ namespace RaspberryIRDotNet.RX
             while (receivedMessages.Count < TargetCaptures)
             {
                 Waiting?.Invoke(this, EventArgs.Empty);
-                CaptureFromDevice();
+                _captureSource.Capture(null);
                 Hit?.Invoke(this, EventArgs.Empty);
                 if (_lastReceived == null)
                 {
-                    throw new Exception("Expected this to have a value.");
+                    /// One of the <see cref="Miss" /> event handlers must have used <see cref="ReceivedPulseSpaceBurstEventArgs.StopCapture"/>.
+                    throw new OperationCanceledException("The capture was stopped.");
                 }
                 receivedMessages.Add(_lastReceived);
-                if (CaptureDelay > TimeSpan.Zero)
+                if (CaptureDelay > TimeSpan.Zero && _captureSource.RealTime)
                 {
                     System.Threading.Thread.Sleep(CaptureDelay);
                 }

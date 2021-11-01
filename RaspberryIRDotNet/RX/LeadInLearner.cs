@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using RaspberryIRDotNet.RX.PulseSpaceSource;
 
 namespace RaspberryIRDotNet.RX
 {
     /// <summary>
     /// Learn the lead-in pattern, as durations.
     /// </summary>
-    public class LeadInLearner : PulseSpaceCapture
+    public class LeadInLearner
     {
         private readonly List<PulseSpaceDurationList> _received = new List<PulseSpaceDurationList>();
 
@@ -33,31 +34,48 @@ namespace RaspberryIRDotNet.RX
             _debounceTimer = timer;
         }
 
-        protected override bool OnReceivePulseSpaceBlock(PulseSpaceDurationList buffer)
+        private readonly IPulseSpaceSource _captureSource;
+
+        /// <param name="captureDevicePath">The IR capture device, example '/dev/lirc0'.</param>
+        public LeadInLearner(string captureDevicePath) : this(new PulseSpaceCaptureLirc(captureDevicePath))
         {
-            if (buffer.Count < 10) // If the message is short then assume it is noise or a key repeat signal.
+            if (string.IsNullOrWhiteSpace(captureDevicePath))
             {
-                return true;
+                throw new ArgumentNullException(nameof(captureDevicePath));
+            }
+        }
+        /// <param name="enableDebounceTimer">Set to TRUE for a real time source. Set to FALSE for a pre-recorded source.</param>
+        public LeadInLearner(IPulseSpaceSource source)
+        {
+            _captureSource = source ?? throw new ArgumentNullException(nameof(source));
+            _captureSource.ReceivedPulseSpaceBurst += ReceivedPulseSpaceBurst;
+        }
+
+        private void ReceivedPulseSpaceBurst(object sender, ReceivedPulseSpaceBurstEventArgs e)
+        {
+            if (e.Buffer.Count < 10) // If the message is short then assume it is noise or a key repeat signal.
+            {
+                return;
             }
 
-            if (buffer[0] < 600 || buffer[1] < 400) // The lead-in is usually quite long (typically a few thousand microsecs for the pulse at least). So if the signals are short then it is probably noise.
+            if (e.Buffer[0] < 600 || e.Buffer[1] < 400) // The lead-in is usually quite long (typically a few thousand microsecs for the pulse at least). So if the signals are short then it is probably noise.
             {
-                return true;
+                return;
             }
 
-            if (!_debounceTimer.ReadyToDoAnother) // Allow the user time to let go of the button.
+            if (_captureSource.RealTime && !_debounceTimer.ReadyToDoAnother) // Allow the user time to let go of the button.
             {
-                return true;
+                return;
             }
 
-            _received.Add(buffer.Copy());
+            _received.Add(e.Buffer.Copy());
             Received?.Invoke(this, EventArgs.Empty);
             _debounceTimer.Restart();
 
             if (_received.Count < MinimumMatchingCaptures)
             {
                 // Not even worth trying to work it out before we have enough.
-                return true;
+                return;
             }
 
             _foundLeadIn = WorkOutLeadIn();
@@ -67,9 +85,10 @@ namespace RaspberryIRDotNet.RX
                 {
                     throw new Exceptions.InsufficientMatchingSamplesException("Got 3 times the target number of captures and still can't find a pattern. Either there is too much noise or there is no lead-in.");
                 }
-                return true;
+                return;
             }
-            return false; // Got it, we can stop now.
+
+            e.StopCapture = true; // Got it, we can stop now.
         }
 
         private PulseSpaceDurationList WorkOutLeadIn()
@@ -111,7 +130,7 @@ namespace RaspberryIRDotNet.RX
                 throw new ArgumentOutOfRangeException(nameof(MinimumMatchingCaptures));
             }
 
-            CaptureFromDevice();
+            _captureSource.Capture(null);
             return _foundLeadIn;
         }
     }

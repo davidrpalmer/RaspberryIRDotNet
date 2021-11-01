@@ -119,13 +119,15 @@ namespace RaspberryIRDotNet.Tests.Unit.RX
 
         private RaspberryIRDotNet.RX.LeadInLearner NewLeadInLearner(FileSystem.IFileSystem fileSystem)
         {
-            var subject = new RaspberryIRDotNet.RX.LeadInLearner()
+            var pulseSpaceSource = new RaspberryIRDotNet.RX.PulseSpaceSource.PulseSpaceCaptureLirc(LircPath, fileSystem)
             {
-                CaptureDevice = LircPath,
-                MinimumMatchingCaptures = 3,
                 ThrowOnUnknownPacket = true
             };
-            subject.SetFileSystem(fileSystem);
+
+            var subject = new RaspberryIRDotNet.RX.LeadInLearner(pulseSpaceSource)
+            {
+                MinimumMatchingCaptures = 3,
+            };
 
             var mockDebounce = new Mock<RaspberryIRDotNet.RX.IDebounceTimer>();
             mockDebounce.SetupGet(x => x.ReadyToDoAnother).Returns(true);

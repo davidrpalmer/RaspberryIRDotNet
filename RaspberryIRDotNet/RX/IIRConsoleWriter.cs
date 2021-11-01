@@ -9,8 +9,6 @@ namespace RaspberryIRDotNet.RX
     {
         Action<string> ConsoleWriteLine { get; }
 
-        void Start();
-
-        void StopWhenPossible();
+        void Start(ReadCancellationToken cancellationToken);
     }
 }

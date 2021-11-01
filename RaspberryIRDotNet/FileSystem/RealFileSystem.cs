@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Text;
-using Microsoft.Win32.SafeHandles;
 
 namespace RaspberryIRDotNet.FileSystem
 {
@@ -24,59 +23,12 @@ namespace RaspberryIRDotNet.FileSystem
 
         public IOpenFile OpenRead(string path)
         {
-            return new RealFileStreamWrapper(File.Open(path, FileMode.Open, FileAccess.Read));
+            return new RealOpenFile(File.Open(path, FileMode.Open, FileAccess.Read));
         }
 
         public IOpenFile OpenWrite(string path)
         {
-            return new RealFileStreamWrapper(File.Open(path, FileMode.Open, FileAccess.Write));
-        }
-
-        /// <summary>
-        /// Unlike <see cref="FileStream.Write"/> this method waits for the IR device to transmit before returning.
-        /// </summary>
-        public void WriteToDevice(IOpenFile file, byte[] buffer)
-        {
-            var handle = FileToHandle(file);
-
-            int result = Native.Write(handle, buffer, buffer.Length);
-            ThrowIfIOError(result);
-
-            if (result != buffer.Length)
-            {
-                throw new IOException($"Did not write the expected number of bytes to the IR device. Expected={buffer.Length}, Actual={result}");
-            }
-        }
-
-        public uint IoCtlReadUInt32(IOpenFile file, uint request)
-        {
-            var handle = FileToHandle(file);
-
-            int ioCtlResult = Native.IOCtlRead(handle, request, out uint data);
-            ThrowIfIOError(ioCtlResult);
-            return data;
-        }
-
-        public void IoCtlWrite(IOpenFile file, uint request, uint data)
-        {
-            var handle = FileToHandle(file);
-
-            int ioCtlResult = Native.IOCtlWrite(handle, request, ref data);
-            ThrowIfIOError(ioCtlResult);
-        }
-
-        private SafeFileHandle FileToHandle(IOpenFile file)
-        {
-            if (file == null) { throw new ArgumentNullException(nameof(file)); }
-            return ((RealFileStreamWrapper)file).FileStream.SafeFileHandle;
-        }
-
-        private void ThrowIfIOError(int returnCode)
-        {
-            if (returnCode < 0)
-            {
-                ThrowLastNativeError();
-            }
+            return new RealOpenFile(File.Open(path, FileMode.Open, FileAccess.Write));
         }
 
         private void ThrowLastNativeError()

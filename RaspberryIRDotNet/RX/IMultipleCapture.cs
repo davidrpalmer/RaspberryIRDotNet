@@ -1,4 +1,5 @@
 ﻿using System;
+using RaspberryIRDotNet.RX.PulseSpaceSource;
 
 namespace RaspberryIRDotNet.RX
 {
@@ -17,7 +18,7 @@ namespace RaspberryIRDotNet.RX
         /// <summary>
         /// IR noise got in the way of a capture.
         /// </summary>
-        event EventHandler Miss;
+        event EventHandler<ReceivedPulseSpaceBurstEventArgs> Miss;
 
         TimeSpan CaptureDelay { get; }
     }

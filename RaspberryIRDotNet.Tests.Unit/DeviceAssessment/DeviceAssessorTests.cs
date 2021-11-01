@@ -18,9 +18,6 @@ namespace RaspberryIRDotNet.Tests.Unit.DeviceAssessment
             var fileHandle = new Mock<FileSystem.IOpenFile>(MockBehavior.Strict);
 
             fileSystem
-                .Setup(x => x.IoCtlReadUInt32(It.Is<FileSystem.IOpenFile>(arg => arg == fileHandle.Object), It.Is<uint>(arg => arg == LircConstants.LIRC_GET_FEATURES)))
-                .Returns((uint)(DeviceFeatures.SendModePulse | DeviceFeatures.SetSendCarrier));
-            fileSystem
                 .Setup(x => x.OpenRead(It.Is<string>(arg => arg == LircPath)))
                 .Returns(fileHandle.Object);
             fileSystem
@@ -31,6 +28,9 @@ namespace RaspberryIRDotNet.Tests.Unit.DeviceAssessment
                 .Returns(LircPath);
 
             fileHandle.Setup(x => x.Dispose());
+            fileHandle
+                .Setup(x => x.IoCtlReadUInt32(It.Is<uint>(arg => arg == LircConstants.LIRC_GET_FEATURES)))
+                .Returns((uint)(DeviceFeatures.SendModePulse | DeviceFeatures.SetSendCarrier));
 
             var assessor = new DeviceAssessor(fileSystem.Object);
 
@@ -42,7 +42,7 @@ namespace RaspberryIRDotNet.Tests.Unit.DeviceAssessment
             fileSystem.Verify(x => x.GetFullPath(It.IsAny<string>()), Times.Once);
             fileSystem.Verify(x => x.GetRealPath(It.IsAny<string>()), Times.Once);
             fileHandle.Verify(x => x.Dispose(), Times.Once);
-            fileSystem.Verify(x => x.IoCtlReadUInt32(It.IsAny<FileSystem.IOpenFile>(), It.Is<uint>(arg => arg == LircConstants.LIRC_GET_FEATURES)), Times.Once);
+            fileHandle.Verify(x => x.IoCtlReadUInt32(It.Is<uint>(arg => arg == LircConstants.LIRC_GET_FEATURES)), Times.Once);
 
             Assert.That(result.Path, Is.EqualTo(LircPath));
             Assert.That(result.RealPath, Is.EqualTo(LircPath));
@@ -57,9 +57,9 @@ namespace RaspberryIRDotNet.Tests.Unit.DeviceAssessment
             Assert.That(result.MaximumReceiveTimeout, Is.Null);
         }
 
-        private void SetUpTimeoutQuery(Mock<FileSystem.IFileSystem> fileSystem, Mock<FileSystem.IOpenFile> fileHandle, uint command, uint result, bool timeoutQueriesWork)
+        private void SetUpTimeoutQuery(Mock<FileSystem.IOpenFile> fileHandle, uint command, uint result, bool timeoutQueriesWork)
         {
-            var setup = fileSystem.Setup(x => x.IoCtlReadUInt32(It.Is<FileSystem.IOpenFile>(arg => arg == fileHandle.Object), It.Is<uint>(arg => arg == command)));
+            var setup = fileHandle.Setup(x => x.IoCtlReadUInt32(It.Is<uint>(arg => arg == command)));
             if (timeoutQueriesWork)
             {
                 setup.Returns(result);
@@ -86,9 +86,6 @@ namespace RaspberryIRDotNet.Tests.Unit.DeviceAssessment
             var fileHandle = new Mock<FileSystem.IOpenFile>(MockBehavior.Strict);
 
             fileSystem
-                .Setup(x => x.IoCtlReadUInt32(It.Is<FileSystem.IOpenFile>(arg => arg == fileHandle.Object), It.Is<uint>(arg => arg == LircConstants.LIRC_GET_FEATURES)))
-                .Returns((uint)(DeviceFeatures.ReceiveModeMode2 | DeviceFeatures.ReceiveLircCode | DeviceFeatures.UseWidebandReceiver));
-            fileSystem
                 .Setup(x => x.OpenRead(It.Is<string>(arg => arg == LircPath)))
                 .Returns(fileHandle.Object);
             fileSystem
@@ -98,11 +95,14 @@ namespace RaspberryIRDotNet.Tests.Unit.DeviceAssessment
                 .Setup(x => x.GetRealPath(It.Is<string>(arg => arg == LircPath)))
                 .Returns(LircPath);
 
-            SetUpTimeoutQuery(fileSystem, fileHandle, LircConstants.LIRC_GET_MIN_TIMEOUT, minTimeout, timeoutQueriesWork);
-            SetUpTimeoutQuery(fileSystem, fileHandle, LircConstants.LIRC_GET_MAX_TIMEOUT, maxTimeout, timeoutQueriesWork);
-            SetUpTimeoutQuery(fileSystem, fileHandle, LircConstants.LIRC_GET_REC_TIMEOUT, currentTimeout, timeoutQueriesWork);
+            SetUpTimeoutQuery(fileHandle, LircConstants.LIRC_GET_MIN_TIMEOUT, minTimeout, timeoutQueriesWork);
+            SetUpTimeoutQuery(fileHandle, LircConstants.LIRC_GET_MAX_TIMEOUT, maxTimeout, timeoutQueriesWork);
+            SetUpTimeoutQuery(fileHandle, LircConstants.LIRC_GET_REC_TIMEOUT, currentTimeout, timeoutQueriesWork);
 
             fileHandle.Setup(x => x.Dispose());
+            fileHandle
+                .Setup(x => x.IoCtlReadUInt32(It.Is<uint>(arg => arg == LircConstants.LIRC_GET_FEATURES)))
+                .Returns((uint)(DeviceFeatures.ReceiveModeMode2 | DeviceFeatures.ReceiveLircCode | DeviceFeatures.UseWidebandReceiver));
 
             var assessor = new DeviceAssessor(fileSystem.Object);
 
@@ -114,10 +114,10 @@ namespace RaspberryIRDotNet.Tests.Unit.DeviceAssessment
             fileSystem.Verify(x => x.GetFullPath(It.IsAny<string>()), Times.Once);
             fileSystem.Verify(x => x.GetRealPath(It.IsAny<string>()), Times.Once);
             fileHandle.Verify(x => x.Dispose(), Times.Once);
-            fileSystem.Verify(x => x.IoCtlReadUInt32(It.IsAny<FileSystem.IOpenFile>(), It.Is<uint>(arg => arg == LircConstants.LIRC_GET_FEATURES)), Times.Once);
-            fileSystem.Verify(x => x.IoCtlReadUInt32(It.IsAny<FileSystem.IOpenFile>(), It.Is<uint>(arg => arg == LircConstants.LIRC_GET_MIN_TIMEOUT)), Times.Once);
-            fileSystem.Verify(x => x.IoCtlReadUInt32(It.IsAny<FileSystem.IOpenFile>(), It.Is<uint>(arg => arg == LircConstants.LIRC_GET_MAX_TIMEOUT)), Times.Once);
-            fileSystem.Verify(x => x.IoCtlReadUInt32(It.IsAny<FileSystem.IOpenFile>(), It.Is<uint>(arg => arg == LircConstants.LIRC_GET_REC_TIMEOUT)), Times.Once);
+            fileHandle.Verify(x => x.IoCtlReadUInt32(It.Is<uint>(arg => arg == LircConstants.LIRC_GET_FEATURES)), Times.Once);
+            fileHandle.Verify(x => x.IoCtlReadUInt32(It.Is<uint>(arg => arg == LircConstants.LIRC_GET_MIN_TIMEOUT)), Times.Once);
+            fileHandle.Verify(x => x.IoCtlReadUInt32(It.Is<uint>(arg => arg == LircConstants.LIRC_GET_MAX_TIMEOUT)), Times.Once);
+            fileHandle.Verify(x => x.IoCtlReadUInt32(It.Is<uint>(arg => arg == LircConstants.LIRC_GET_REC_TIMEOUT)), Times.Once);
 
             Assert.That(result.Path, Is.EqualTo(LircPath));
             Assert.That(result.RealPath, Is.EqualTo(LircPath));
@@ -152,9 +152,6 @@ namespace RaspberryIRDotNet.Tests.Unit.DeviceAssessment
             var fileHandle = new Mock<FileSystem.IOpenFile>(MockBehavior.Strict);
 
             fileSystem
-                .Setup(x => x.IoCtlReadUInt32(It.Is<FileSystem.IOpenFile>(arg => arg == fileHandle.Object), It.Is<uint>(arg => arg == LircConstants.LIRC_GET_FEATURES)))
-                .Throws(new System.ComponentModel.Win32Exception(25));
-            fileSystem
                 .Setup(x => x.OpenRead(It.Is<string>(arg => arg == LircPath)))
                 .Returns(fileHandle.Object);
             fileSystem
@@ -165,6 +162,9 @@ namespace RaspberryIRDotNet.Tests.Unit.DeviceAssessment
                 .Returns(LircPath);
 
             fileHandle.Setup(x => x.Dispose());
+            fileHandle
+                .Setup(x => x.IoCtlReadUInt32(It.Is<uint>(arg => arg == LircConstants.LIRC_GET_FEATURES)))
+                .Throws(new System.ComponentModel.Win32Exception(25));
 
             var assessor = new DeviceAssessor(fileSystem.Object);
 
@@ -174,7 +174,7 @@ namespace RaspberryIRDotNet.Tests.Unit.DeviceAssessment
             // ASSERT
             fileSystem.Verify(x => x.OpenRead(It.IsAny<string>()), Times.Once);
             fileHandle.Verify(x => x.Dispose(), Times.Once);
-            fileSystem.Verify(x => x.IoCtlReadUInt32(It.IsAny<FileSystem.IOpenFile>(), It.Is<uint>(arg => arg == LircConstants.LIRC_GET_FEATURES)), Times.Once);
+            fileHandle.Verify(x => x.IoCtlReadUInt32(It.Is<uint>(arg => arg == LircConstants.LIRC_GET_FEATURES)), Times.Once);
         }
 
         [Test]
@@ -184,9 +184,6 @@ namespace RaspberryIRDotNet.Tests.Unit.DeviceAssessment
             var fileSystem = new Mock<FileSystem.IFileSystem>(MockBehavior.Strict);
             var fileHandle = new Mock<FileSystem.IOpenFile>(MockBehavior.Strict);
 
-            fileSystem
-                .Setup(x => x.IoCtlReadUInt32(It.Is<FileSystem.IOpenFile>(arg => arg == fileHandle.Object), It.Is<uint>(arg => arg == LircConstants.LIRC_GET_FEATURES)))
-                .Throws(new System.ComponentModel.Win32Exception(22));
             fileSystem
                 .Setup(x => x.OpenRead(It.Is<string>(arg => arg == LircPath)))
                 .Returns(fileHandle.Object);
@@ -198,6 +195,9 @@ namespace RaspberryIRDotNet.Tests.Unit.DeviceAssessment
                 .Returns(LircPath);
 
             fileHandle.Setup(x => x.Dispose());
+            fileHandle
+                .Setup(x => x.IoCtlReadUInt32(It.Is<uint>(arg => arg == LircConstants.LIRC_GET_FEATURES)))
+                .Throws(new System.ComponentModel.Win32Exception(22));
 
             var assessor = new DeviceAssessor(fileSystem.Object);
 
@@ -242,9 +242,6 @@ namespace RaspberryIRDotNet.Tests.Unit.DeviceAssessment
             var fileHandle = new Mock<FileSystem.IOpenFile>(MockBehavior.Strict);
 
             fileSystem
-                .Setup(x => x.IoCtlReadUInt32(It.Is<FileSystem.IOpenFile>(arg => arg == fileHandle.Object), It.Is<uint>(arg => arg == LircConstants.LIRC_GET_FEATURES)))
-                .Returns((uint)(DeviceFeatures.SendModePulse | DeviceFeatures.SetSendCarrier));
-            fileSystem
                 .Setup(x => x.OpenRead(It.Is<string>(arg => arg == absolutePath)))
                 .Returns(fileHandle.Object);
             fileSystem
@@ -256,6 +253,9 @@ namespace RaspberryIRDotNet.Tests.Unit.DeviceAssessment
 
 
             fileHandle.Setup(x => x.Dispose());
+            fileHandle
+                .Setup(x => x.IoCtlReadUInt32(It.Is<uint>(arg => arg == LircConstants.LIRC_GET_FEATURES)))
+                .Returns((uint)(DeviceFeatures.SendModePulse | DeviceFeatures.SetSendCarrier));
 
             var assessor = new DeviceAssessor(fileSystem.Object);
 
