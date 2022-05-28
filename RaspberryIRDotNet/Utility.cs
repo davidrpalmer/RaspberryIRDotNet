@@ -4,17 +4,11 @@ using RaspberryIRDotNet.FileSystem;
 
 namespace RaspberryIRDotNet
 {
-    internal class Utility
+    internal static class Utility
     {
-        private readonly IFileSystem _fileSystem;
-
         public const int UnitDurationMinimum = 1;
-        public const int UnitDurationMaximum = 1000000; // Arbitrary value for sanity check.
-
-        public Utility(IFileSystem fileSystem)
-        {
-            _fileSystem = fileSystem;
-        }
+        public const int UnitDurationMaximum = 500000;
+        public const int MessageDurationMaximum = 500000; // The whole IR transmission cannot exceed this duration. Individual units can be any size so long as the total is less than this.
 
         public static int RoundMicrosecs(int sample, int expectedUnitDuration)
         {
@@ -32,7 +26,7 @@ namespace RaspberryIRDotNet
         /// <summary>
         /// Set the integer value for IR inactivity timeout (microseconds). A value of 0 (if supported by the hardware) disables all hardware timeouts and data should be reported as soon as possible. If the exact value cannot be set, then the next possible value greater than the given value should be set by the driver.
         /// </summary>
-        public void SetRxTimeout(IOpenFile file, int timeoutMicrosecs)
+        public static void SetRxTimeout(IOpenFile file, int timeoutMicrosecs)
         {
             if (timeoutMicrosecs < 0) { throw new ArgumentOutOfRangeException(nameof(timeoutMicrosecs), timeoutMicrosecs, "Timeout must be a positive integer."); }
             uint timeoutUnsigned = checked((uint)timeoutMicrosecs);
@@ -42,7 +36,7 @@ namespace RaspberryIRDotNet
         /// <summary>
         /// Set the integer value for IR inactivity timeout (microseconds). A value of 0 (if supported by the hardware) disables all hardware timeouts and data should be reported as soon as possible. If the exact value cannot be set, then the next possible value greater than the given value should be set by the driver.
         /// </summary>
-        public void SetRxTimeout(IOpenFile file, uint timeoutMicrosecs)
+        public static void SetRxTimeout(IOpenFile file, uint timeoutMicrosecs)
         {
             try
             {
@@ -54,7 +48,7 @@ namespace RaspberryIRDotNet
             }
         }
 
-        public DeviceFeatures GetFeatures(IOpenFile file)
+        public static DeviceFeatures GetFeatures(IOpenFile file)
         {
             try
             {

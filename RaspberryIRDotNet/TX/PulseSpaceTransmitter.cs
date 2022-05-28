@@ -6,7 +6,6 @@ namespace RaspberryIRDotNet.TX
     public abstract class PulseSpaceTransmitter
     {
         private FileSystem.IFileSystem _fileSystem;
-        private Utility _utility;
 
         /// <summary>
         /// The IR transmission device, example '/dev/lirc0'.
@@ -34,7 +33,6 @@ namespace RaspberryIRDotNet.TX
         internal void SetFileSystem(FileSystem.IFileSystem newFS)
         {
             _fileSystem = newFS;
-            _utility = new Utility(_fileSystem);
         }
 
         protected void WriteToDevice(FileSystem.IOpenFile file, IReadOnlyPulseSpaceDurationList buffer)
@@ -46,6 +44,11 @@ namespace RaspberryIRDotNet.TX
             }
             catch (System.ComponentModel.Win32Exception err) when (err.NativeErrorCode == LinuxErrorCodes.EINVAL)
             {
+                if (buffer.TotalDuration() >= Utility.MessageDurationMaximum)
+                {
+                    throw new InvalidPulseSpaceDataException("The IR device rejected the IR data, probably because the data duration was too long.", err);
+                }
+
                 throw new InvalidPulseSpaceDataException("The IR device rejected the IR data.", err);
             }
         }
@@ -63,7 +66,7 @@ namespace RaspberryIRDotNet.TX
             var irDevice = _fileSystem.OpenWrite(TransmissionDevice);
             try
             {
-                DeviceFeatures deviceFeatures = _utility.GetFeatures(irDevice);
+                DeviceFeatures deviceFeatures = Utility.GetFeatures(irDevice);
                 CheckDevice(irDevice, deviceFeatures);
                 ApplySettings(irDevice);
             }

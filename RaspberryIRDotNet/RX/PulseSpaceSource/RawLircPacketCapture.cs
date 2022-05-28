@@ -8,7 +8,6 @@ namespace RaspberryIRDotNet.RX.PulseSpaceSource
     public abstract class RawLircPacketCapture
     {
         private readonly FileSystem.IFileSystem _fileSystem;
-        private readonly Utility _utility;
 
         private readonly object _capturingLocker = new object();
 
@@ -25,7 +24,6 @@ namespace RaspberryIRDotNet.RX.PulseSpaceSource
         protected RawLircPacketCapture(FileSystem.IFileSystem fileSystem)
         {
             _fileSystem = fileSystem;
-            _utility = new Utility(fileSystem);
         }
 
         /// <summary>
@@ -86,12 +84,12 @@ namespace RaspberryIRDotNet.RX.PulseSpaceSource
 
                     using (var irDevice = _fileSystem.OpenRead(CaptureDevice))
                     {
-                        DeviceFeatures deviceFeatures = _utility.GetFeatures(irDevice);
+                        DeviceFeatures deviceFeatures = Utility.GetFeatures(irDevice);
                         CheckDevice(irDevice, deviceFeatures);
 
                         if (TimeoutMicrosecs >= 0)
                         {
-                            _utility.SetRxTimeout(irDevice, TimeoutMicrosecs);
+                            Utility.SetRxTimeout(irDevice, TimeoutMicrosecs);
                         }
                         byte[] buffer = new byte[4];
                         while (true)

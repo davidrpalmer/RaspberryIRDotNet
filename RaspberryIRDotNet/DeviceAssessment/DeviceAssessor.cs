@@ -13,7 +13,6 @@ namespace RaspberryIRDotNet.DeviceAssessment
     public class DeviceAssessor
     {
         private readonly FileSystem.IFileSystem _fileSystem;
-        private readonly Utility _utility;
 
         public DeviceAssessor() : this(new FileSystem.RealFileSystem())
         {
@@ -22,7 +21,6 @@ namespace RaspberryIRDotNet.DeviceAssessment
         internal DeviceAssessor(FileSystem.IFileSystem fileSystem)
         {
             _fileSystem = fileSystem;
-            _utility = new Utility(_fileSystem);
         }
 
         /// <summary>
@@ -38,7 +36,7 @@ namespace RaspberryIRDotNet.DeviceAssessment
             string fullPath = _fileSystem.GetFullPath(path);
             using (var irDevice = _fileSystem.OpenRead(fullPath))
             {
-                DeviceFeatures features = _utility.GetFeatures(irDevice); /// If this is not an IR device then expect a <see cref="NotAnIRDeviceException"/> exception from this.
+                DeviceFeatures features = Utility.GetFeatures(irDevice); /// If this is not an IR device then expect a <see cref="NotAnIRDeviceException"/> exception from this.
 
                 string realPath = _fileSystem.GetRealPath(fullPath);
 

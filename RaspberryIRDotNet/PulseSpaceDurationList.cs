@@ -87,6 +87,19 @@ namespace RaspberryIRDotNet
 
             return IsCloseTo(index, expected, errorMargin);
         }
+
+        public int TotalDuration()
+        {
+            int sum = 0;
+            checked
+            {
+                foreach (int item in this)
+                {
+                    sum += item;
+                }
+            }
+            return sum;
+        }
     }
 
     public interface IReadOnlyPulseSpaceDurationList : IReadOnlyList<int>
@@ -97,6 +110,8 @@ namespace RaspberryIRDotNet
         bool IsCloseTo(int index, int expected, int errorMargin);
 
         bool IsWithinPercent(int index, int expected, double percentage);
+
+        int TotalDuration();
 
         PulseSpaceDurationList Copy();
         PulseSpaceDurationList Copy(int roundTo);

@@ -11,16 +11,13 @@ namespace RaspberryIRDotNet.Tests.Unit
         public void GetFeatures_ValidValue()
         {
             // ARRANGE
-            var fileSystem = new Mock<FileSystem.IFileSystem>(MockBehavior.Strict);
             var fileHandle = new Mock<FileSystem.IOpenFile>(MockBehavior.Strict);
             fileHandle
                 .Setup(x => x.IoCtlReadUInt32(It.Is<uint>(arg => arg == LircConstants.LIRC_GET_FEATURES)))
                 .Returns((uint)(DeviceFeatures.ReceiveModeMode2 | DeviceFeatures.SetSendCarrier));
 
-            var utility = new Utility(fileSystem.Object);
-
             // ACT
-            var features = utility.GetFeatures(fileHandle.Object);
+            var features = Utility.GetFeatures(fileHandle.Object);
 
             // ASSERT
             Assert.That(features.HasFlag(DeviceFeatures.ReceiveModeMode2));
@@ -31,16 +28,13 @@ namespace RaspberryIRDotNet.Tests.Unit
         public void GetFeatures_NotAnIRDevice()
         {
             // ARRANGE
-            var fileSystem = new Mock<FileSystem.IFileSystem>(MockBehavior.Strict);
             var fileHandle = new Mock<FileSystem.IOpenFile>(MockBehavior.Strict);
             fileHandle
                 .Setup(x => x.IoCtlReadUInt32(It.Is<uint>(arg => arg == LircConstants.LIRC_GET_FEATURES)))
                 .Throws(new Win32Exception(LinuxErrorCodes.ENOTTY)); // This exception code means we don't support the IOCTL request here.
 
-            var utility = new Utility(fileSystem.Object);
-
             // ACT, ASSERT
-            Assert.That(() => utility.GetFeatures(fileHandle.Object), Throws.TypeOf<Exceptions.NotAnIRDeviceException>().With.InnerException.TypeOf<Win32Exception>().With.InnerException.Property("NativeErrorCode").EqualTo(25));
+            Assert.That(() => Utility.GetFeatures(fileHandle.Object), Throws.TypeOf<Exceptions.NotAnIRDeviceException>().With.InnerException.TypeOf<Win32Exception>().With.InnerException.Property("NativeErrorCode").EqualTo(25));
         }
 
         [Test]
@@ -48,16 +42,13 @@ namespace RaspberryIRDotNet.Tests.Unit
         {
             // ARRANGE
             const int errorCode = 500; // Just make up a code here that should not be handled by anything else.
-            var fileSystem = new Mock<FileSystem.IFileSystem>(MockBehavior.Strict);
             var fileHandle = new Mock<FileSystem.IOpenFile>(MockBehavior.Strict);
             fileHandle
                 .Setup(x => x.IoCtlReadUInt32(It.Is<uint>(arg => arg == LircConstants.LIRC_GET_FEATURES)))
                 .Throws(new Win32Exception(errorCode));
 
-            var utility = new Utility(fileSystem.Object);
-
             // ACT, ASSERT
-            Assert.That(() => utility.GetFeatures(fileHandle.Object), Throws.TypeOf<Win32Exception>().With.Property("NativeErrorCode").EqualTo(errorCode));
+            Assert.That(() => Utility.GetFeatures(fileHandle.Object), Throws.TypeOf<Win32Exception>().With.Property("NativeErrorCode").EqualTo(errorCode));
         }
 
         [Test]
@@ -67,10 +58,9 @@ namespace RaspberryIRDotNet.Tests.Unit
         {
             // ARRANGE
             var fileHandle = new Mock<FileSystem.IOpenFile>(MockBehavior.Strict);
-            var utility = new Utility(null);
 
             // ACT, ASSERT
-            Assert.That(() => utility.SetRxTimeout(fileHandle.Object, value), Throws.TypeOf<ArgumentOutOfRangeException>().With.Property("ActualValue").EqualTo(value));
+            Assert.That(() => Utility.SetRxTimeout(fileHandle.Object, value), Throws.TypeOf<ArgumentOutOfRangeException>().With.Property("ActualValue").EqualTo(value));
         }
 
         [Test]
@@ -81,17 +71,14 @@ namespace RaspberryIRDotNet.Tests.Unit
         public void SetRxTimeout_ValidInt32Value(int input)
         {
             // ARRANGE
-            var fileSystem = new Mock<FileSystem.IFileSystem>(MockBehavior.Strict);
             var fileHandle = new Mock<FileSystem.IOpenFile>(MockBehavior.Strict);
             fileHandle.Setup(x => x.IoCtlWrite(
                     It.Is<uint>(arg => arg == LircConstants.LIRC_SET_REC_TIMEOUT),
                     It.Is<uint>(arg => arg == input)
                     ));
 
-            var utility = new Utility(fileSystem.Object);
-
             // ACT
-            utility.SetRxTimeout(fileHandle.Object, input);
+            Utility.SetRxTimeout(fileHandle.Object, input);
 
             // ASSERT
             fileHandle.Verify(x => x.IoCtlWrite(It.IsAny<uint>(), It.IsAny<uint>()), Times.Once);
@@ -105,17 +92,14 @@ namespace RaspberryIRDotNet.Tests.Unit
         public void SetRxTimeout_ValidUInt32Value(uint input)
         {
             // ARRANGE
-            var fileSystem = new Mock<FileSystem.IFileSystem>(MockBehavior.Strict);
             var fileHandle = new Mock<FileSystem.IOpenFile>(MockBehavior.Strict);
             fileHandle.Setup(x => x.IoCtlWrite(
                     It.Is<uint>(arg => arg == LircConstants.LIRC_SET_REC_TIMEOUT),
                     It.Is<uint>(arg => arg == input)
                     ));
 
-            var utility = new Utility(fileSystem.Object);
-
             // ACT
-            utility.SetRxTimeout(fileHandle.Object, input);
+            Utility.SetRxTimeout(fileHandle.Object, input);
 
             // ASSERT
             fileHandle.Verify(x => x.IoCtlWrite(It.IsAny<uint>(), It.IsAny<uint>()), Times.Once);

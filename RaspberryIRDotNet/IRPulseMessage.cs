@@ -36,6 +36,11 @@ namespace RaspberryIRDotNet
         /// </summary>
         public int UnitDuration { get; }
 
+        /// <summary>
+        /// The total time it would take to transmit this message (all PULSEs and SPACEs added together).
+        /// </summary>
+        public int TotalDuration => UnitCount * UnitDuration;
+
         /// <param name="pulsesAndSpacesAsDurations">The pulse/space durations. These will be rounded to multiples of the <paramref name="unitDuration"/>.</param>
         /// <param name="unitDuration">How long each unit lasts, in microseconds.</param>
         public IRPulseMessage(IReadOnlyPulseSpaceDurationList pulsesAndSpacesAsDurations, int unitDuration)
