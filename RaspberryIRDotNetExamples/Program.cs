@@ -15,6 +15,7 @@ namespace RaspberryIRDotNetExamples
             new FixedDataSender(),
             new LearnAKey(),
             new LogDecodedPackets(),
+            new FormatSender(),
         };
 
         static void Main(string[] args)
