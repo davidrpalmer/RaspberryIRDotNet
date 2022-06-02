@@ -42,7 +42,7 @@ namespace RaspberryIRDotNet
         public int TotalDuration => UnitCount * UnitDuration;
 
         /// <param name="pulsesAndSpacesAsDurations">The pulse/space durations. These will be rounded to multiples of the <paramref name="unitDuration"/>.</param>
-        /// <param name="unitDuration">How long each unit lasts, in microseconds.</param>
+        /// <param name="unitDuration">How long each unit lasts, in microseconds. The input durations will be rounded to this.</param>
         public IRPulseMessage(IReadOnlyPulseSpaceDurationList pulsesAndSpacesAsDurations, int unitDuration)
         {
             if (pulsesAndSpacesAsDurations == null)
@@ -64,12 +64,8 @@ namespace RaspberryIRDotNet
         }
 
         /// <param name="pulsesAndSpacesAsNumberOfUnits">Each item represents a PULSE or a SPACE. Each value represents the number of units.</param>
+        /// <param name="unitDuration">How long each unit lasts, in microseconds.</param>
         public IRPulseMessage(IReadOnlyPulseSpaceUnitList pulsesAndSpacesAsNumberOfUnits, int unitDuration)
-            : this(pulsesAndSpacesAsNumberOfUnits, unitDuration, makeCopy: true)
-        {
-        }
-
-        private IRPulseMessage(IReadOnlyPulseSpaceUnitList pulsesAndSpacesAsNumberOfUnits, int unitDuration, bool makeCopy)
         {
             if (pulsesAndSpacesAsNumberOfUnits == null)
             {
@@ -82,14 +78,7 @@ namespace RaspberryIRDotNet
 
             UnitDuration = unitDuration;
 
-            if (makeCopy)
-            {
-                _units = pulsesAndSpacesAsNumberOfUnits.Copy();
-            }
-            else
-            {
-                _units = (PulseSpaceUnitList)pulsesAndSpacesAsNumberOfUnits;
-            }
+            _units = pulsesAndSpacesAsNumberOfUnits.Copy(); // Make a copy so if the input is modified later on it won't affect us.
 
             _durations = new PulseSpaceDurationList(unitDuration, pulsesAndSpacesAsNumberOfUnits);
 
