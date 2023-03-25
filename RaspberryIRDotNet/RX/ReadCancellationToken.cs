@@ -13,6 +13,11 @@ namespace RaspberryIRDotNet.RX
 
         private ManualResetEventSlim _zeroRefWaiter;
 
+        /// <summary>
+        /// Event raised when cancellation is requested. Note that if cancellation has already been requested then this won't be raised.
+        /// </summary>
+        internal event EventHandler CancellationRequested;
+
         public bool IsCancellationRequested { get; private set; } // Can read without a lock, but must hold _locker to set.
 
         public ReadCancellationToken()
@@ -27,9 +32,15 @@ namespace RaspberryIRDotNet.RX
         /// <param name="wait">Automatically call <see cref="Wait"/> after requesting cancellation.</param>
         public void Cancel(bool wait = false)
         {
+            bool raiseEvent;
             lock (_locker)
             {
+                raiseEvent = !IsCancellationRequested; // Only raise the event for the first cancel.
                 IsCancellationRequested = true;
+            }
+            if (raiseEvent)
+            {
+                CancellationRequested?.Invoke(this, EventArgs.Empty);
             }
 
             if (wait)

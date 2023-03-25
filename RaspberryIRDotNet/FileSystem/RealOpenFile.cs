@@ -1,22 +1,48 @@
 ﻿using System;
 using System.IO;
+using System.IO.Pipes;
 using RaspberryIRDotNet.RX;
 
 namespace RaspberryIRDotNet.FileSystem
 {
     class RealOpenFile : IOpenFile
     {
+        private const int _readCancelIndicator = -1;
+
         private readonly FileStream _fileStream;
+
+        private AnonymousPipeServerStream _pipeServer;
+        private AnonymousPipeClientStream _pipeClient;
+
+        private bool _disposedValue;
 
         public RealOpenFile(FileStream fileStream)
         {
-            if (fileStream == null) { throw new ArgumentNullException(); }
-            _fileStream = fileStream;
+            _fileStream = fileStream ?? throw new ArgumentNullException();
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposedValue)
+            {
+                if (disposing)
+                {
+                    _fileStream.Dispose();
+
+                    _pipeClient?.Dispose();
+                    _pipeServer?.DisposeLocalCopyOfClientHandle();
+                    _pipeServer?.Dispose();
+                }
+
+                _disposedValue = true;
+            }
         }
 
         public void Dispose()
         {
-            _fileStream.Dispose();
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
 
         /// <summary>
@@ -50,7 +76,6 @@ namespace RaspberryIRDotNet.FileSystem
 
         public int ReadFromDevice(byte[] buffer, ReadCancellationToken cancellationToken)
         {
-            const int cancelIndicator = -1;
             if (buffer == null)
             {
                 throw new ArgumentNullException(nameof(buffer));
@@ -68,47 +93,75 @@ namespace RaspberryIRDotNet.FileSystem
                 throw new InvalidOperationException("Device not opened for reading.");
             }
 
-            if (!cancellationToken.AddReference())
+            if (_pipeServer == null)
             {
-                return cancelIndicator;
+                // We could create a new pipe (and dispose it) for each read, but reads are often done in tight loops so better to cache the pipe.
+                _pipeServer = new AnonymousPipeServerStream(PipeDirection.Out, HandleInheritability.None);
+                _pipeClient = new AnonymousPipeClientStream(PipeDirection.In, _pipeServer.ClientSafePipeHandle);
             }
+
+            void CancelEventHandler(object sender, EventArgs e)
+            {
+                _pipeServer.WriteByte(1); // Unblock poll()
+            }
+
+            cancellationToken.CancellationRequested += CancelEventHandler;
             try
             {
-                Native.pollfd[] fds = new Native.pollfd[]
+                if (!cancellationToken.AddReference())
                 {
-                    new Native.pollfd()
-                    {
-                         fd = _fileStream.SafeFileHandle.DangerousGetHandle().ToInt32(),
-                         events = Native.POLL_EVENTS.POLLIN
-                    }
-                };
-
-                const int pollTime = 1000; // How responsive vs how wasteful should the cancel be. Lower is more responsive, but wastes CPU time.
-
-                while (true)
+                    return _readCancelIndicator;
+                }
+                try
                 {
-                    if (cancellationToken.IsCancellationRequested)
-                    {
-                        return cancelIndicator;
-                    }
-
-                    var pollResult = Native.Poll(fds, fds.Length, pollTime);
-                    ThrowIfIOError(pollResult);
-
-                    if (cancellationToken.IsCancellationRequested)
-                    {
-                        return cancelIndicator;
-                    }
-
-                    if (pollResult > 0)
-                    {
-                        return _fileStream.Read(buffer, 0, buffer.Length);
-                    }
+                    return ReadFromDeviceInner(buffer, cancellationToken);
+                }
+                finally
+                {
+                    cancellationToken.ReleaseReference();
                 }
             }
             finally
             {
-                cancellationToken.ReleaseReference();
+                cancellationToken.CancellationRequested -= CancelEventHandler;
+            }
+        }
+
+        private int ReadFromDeviceInner(byte[] buffer, ReadCancellationToken cancellationToken)
+        {
+            Native.pollfd[] fds = new Native.pollfd[]
+            {
+                new Native.pollfd()
+                {
+                    fd = _pipeClient.SafePipeHandle.DangerousGetHandle().ToInt32(),
+                    events = Native.POLL_EVENTS.POLLIN
+                },
+                new Native.pollfd()
+                {
+                    fd = _fileStream.SafeFileHandle.DangerousGetHandle().ToInt32(),
+                    events = Native.POLL_EVENTS.POLLIN
+                }
+            };
+
+            while (true)
+            {
+                var pollResult = Native.Poll(fds, fds.Length, -1);
+                ThrowIfIOError(pollResult);
+
+                if (fds[0].revents.HasFlag(Native.POLL_EVENTS.POLLIN))
+                {
+                    _pipeClient.ReadByte(); // Reset the pipe for next time
+                }
+
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    return _readCancelIndicator;
+                }
+
+                if (fds[1].revents.HasFlag(Native.POLL_EVENTS.POLLIN))
+                {
+                    return _fileStream.Read(buffer, 0, buffer.Length);
+                }
             }
         }
 
