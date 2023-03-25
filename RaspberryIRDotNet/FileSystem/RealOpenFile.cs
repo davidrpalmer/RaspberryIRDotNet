@@ -48,7 +48,7 @@ namespace RaspberryIRDotNet.FileSystem
                 {
                     new Native.pollfd()
                     {
-                         fd = _fileStream.SafeFileHandle.DangerousGetHandle(),
+                         fd = _fileStream.SafeFileHandle.DangerousGetHandle().ToInt32(),
                          events = Native.POLL_EVENTS.POLLIN
                     }
                 };

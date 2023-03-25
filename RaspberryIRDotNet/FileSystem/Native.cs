@@ -40,7 +40,7 @@ namespace RaspberryIRDotNet.FileSystem
         [StructLayout(LayoutKind.Sequential)]
         public struct pollfd
         {
-            public IntPtr fd;
+            public int fd;
             public POLL_EVENTS events;
             public POLL_EVENTS revents;
         }
