@@ -10,12 +10,19 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Copyright>Copyright (c) 2023 David Palmer</Copyright>
     <Description>Library for interfacing to the Raspberry Pi infrared drivers (gpio-ir, gpio-ir-tx and pwm-ir-tx).</Description>
+    <Title>Raspberry IR .NET</Title>
+    <Version>0.0.0</Version>
+    <Product>$(Title)</Product>
+    <RepositoryUrl>https://github.com/davidrpalmer/RaspberryIRDotNet</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/davidrpalmer/RaspberryIRDotNet</PackageProjectUrl>
+    <PackageTags>raspberry-pi infrared ir-receiver ir-transmitter ir-blaster lirc</PackageTags>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
     <DebugType>none</DebugType>
     <DebugSymbols>false</DebugSymbols>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

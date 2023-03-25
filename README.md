@@ -16,7 +16,9 @@ This library supports both transmitting and receiving IR codes.
 
 ## Getting Started
 
-The `RaspberryIRDotNetExamples` console app contains some examples of how to use the library.
+Get from [NuGet.org](https://www.nuget.org/packages/RaspberryIRDotNet/)
+
+The `RaspberryIRDotNetExamples` console app (not in the NuGet package) contains some examples of how to use the library.
 
 First check `DemoConfig.cs` in `RaspberryIRDotNetExamples` has the right paths to your `/dev/lirc` devices as per the `<summary>` descriptions in that file.
 
