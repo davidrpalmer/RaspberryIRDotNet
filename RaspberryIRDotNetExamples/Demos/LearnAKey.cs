@@ -38,7 +38,7 @@ namespace RaspberryIRDotNetExamples.Demos
                     }
                 };
                 recorder.Filtered += (s, e) => Console.Write("-");
-                capturedIR = recorder.Record(new RaspberryIRDotNet.ReadCancellationToken(TimeSpan.FromSeconds(55)));
+                capturedIR = recorder.Record(new RaspberryIRDotNet.RX.ReadCancellationToken(TimeSpan.FromSeconds(55)));
                 if (guessedFormat == null)
                 {
                     guessedFormat = GuessFormat(capturedIR);

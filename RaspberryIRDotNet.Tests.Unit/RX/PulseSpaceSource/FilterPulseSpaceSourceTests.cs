@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using NUnit.Framework;
+using RaspberryIRDotNet.RX;
 using RaspberryIRDotNet.RX.PulseSpaceSource;
 using RaspberryIRDotNet.RX.Filters;
 using Moq;

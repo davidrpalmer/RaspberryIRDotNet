@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Moq;
+using RaspberryIRDotNet.RX;
 
 namespace RaspberryIRDotNet.Tests.Unit.RX
 {

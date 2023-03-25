@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Threading;
 
-namespace RaspberryIRDotNet
+namespace RaspberryIRDotNet.RX
 {
     public class ReadCancellationToken
     {
         private int _refCount = 0;
 
-        private object _locker = new object();
+        private readonly object _locker = new object();
 
-        private object _waitLocker = new object();
+        private readonly object _waitLocker = new object();
 
         private ManualResetEventSlim _zeroRefWaiter;
 
