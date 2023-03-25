@@ -24,6 +24,19 @@ namespace RaspberryIRDotNet.FileSystem
         /// </summary>
         public void WriteToDevice(byte[] buffer)
         {
+            if (buffer == null)
+            {
+                throw new ArgumentNullException(nameof(buffer));
+            }
+            if (_disposedValue)
+            {
+                throw new ObjectDisposedException(nameof(RealOpenFile));
+            }
+            if (!_fileStream.CanWrite)
+            {
+                throw new InvalidOperationException("Device not opened for writing.");
+            }
+
             var handle = _fileStream.SafeFileHandle;
 
             int result = Native.Write(handle, buffer, buffer.Length);
@@ -38,6 +51,22 @@ namespace RaspberryIRDotNet.FileSystem
         public int ReadFromDevice(byte[] buffer, ReadCancellationToken cancellationToken)
         {
             const int cancelIndicator = -1;
+            if (buffer == null)
+            {
+                throw new ArgumentNullException(nameof(buffer));
+            }
+            if (cancellationToken == null)
+            {
+                throw new ArgumentNullException(nameof(cancellationToken));
+            }
+            if (_disposedValue)
+            {
+                throw new ObjectDisposedException(nameof(RealOpenFile));
+            }
+            if (!_fileStream.CanRead)
+            {
+                throw new InvalidOperationException("Device not opened for reading.");
+            }
 
             if (!cancellationToken.AddReference())
             {
@@ -104,14 +133,8 @@ namespace RaspberryIRDotNet.FileSystem
         {
             if (returnCode < 0)
             {
-                ThrowLastNativeError();
+                throw new System.ComponentModel.Win32Exception();
             }
-        }
-
-        private void ThrowLastNativeError()
-        {
-            int lastError = System.Runtime.InteropServices.Marshal.GetLastWin32Error();
-            throw new System.ComponentModel.Win32Exception(lastError); // The even though the name is Win32 this exception actually works for Linux and gives the right messages.
         }
     }
 }
