@@ -5,9 +5,9 @@ This is a .NET Core library for accessing infrared devices (found at `/dev/lirc*
 This library supports both transmitting and receiving IR codes.
 
 ## Prerequisites
- * Visual Studio 2019 (or some other tools for building a .NET Core app)
+ * Visual Studio 2022 (or some other tools for building a .NET Core app)
  * A Raspberry Pi running Raspberry Pi OS (previously called Raspbian)
- * [.NET Core 3.1 Runtime](https://dotnet.microsoft.com/download/dotnet-core/) installed on the Pi
+ * [.NET 6.0 Runtime](https://dotnet.microsoft.com/en-us/download/dotnet/6.0) installed on the Pi
  * The necessary IR drivers loaded via `/boot/config.txt` to create the `/dev/lircX` device(s)
    * For IR receiving this is `gpio-ir`
    * For IR sending (blasting) this is either `pwm-ir-tx` or `gpio-ir-tx`
