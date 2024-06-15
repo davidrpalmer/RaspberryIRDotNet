@@ -2,6 +2,9 @@
 using System.Runtime.InteropServices;
 using Microsoft.Win32.SafeHandles;
 
+#pragma warning disable CS8981 // The type name only contains lower-cased ascii characters. Such names may become reserved for the language.
+#pragma warning disable IDE1006 // Naming Styles
+
 namespace RaspberryIRDotNet.FileSystem
 {
     internal static class Native

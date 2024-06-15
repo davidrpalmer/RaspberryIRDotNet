@@ -7,7 +7,7 @@ This library supports both transmitting and receiving IR codes.
 ## Prerequisites
  * Visual Studio 2022 (or some other tools for building a .NET Core app)
  * A Raspberry Pi running Raspberry Pi OS (previously called Raspbian)
- * [.NET 6.0 Runtime](https://dotnet.microsoft.com/en-us/download/dotnet/6.0) installed on the Pi
+ * [.NET 8.0 Runtime](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) installed on the Pi
  * The necessary IR drivers loaded via `/boot/config.txt` to create the `/dev/lircX` device(s)
    * For IR receiving this is `gpio-ir`
    * For IR sending (blasting) this is either `pwm-ir-tx` or `gpio-ir-tx`
