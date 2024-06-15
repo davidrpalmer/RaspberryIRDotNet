@@ -16,6 +16,7 @@
     <RepositoryUrl>https://github.com/davidrpalmer/RaspberryIRDotNet</RepositoryUrl>
     <PackageProjectUrl>https://github.com/davidrpalmer/RaspberryIRDotNet</PackageProjectUrl>
     <PackageTags>raspberry-pi infrared ir-receiver ir-transmitter ir-blaster lirc</PackageTags>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

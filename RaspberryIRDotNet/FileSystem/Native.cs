@@ -7,22 +7,22 @@ using Microsoft.Win32.SafeHandles;
 
 namespace RaspberryIRDotNet.FileSystem
 {
-    internal static class Native
+    internal static partial class Native
     {
-        [DllImport("libc", EntryPoint = "ioctl", SetLastError = true)]
-        public static extern int IOCtlRead(SafeFileHandle handle, uint request, out uint data);
+        [LibraryImport("libc", EntryPoint = "ioctl", SetLastError = true)]
+        public static partial int IOCtlRead(SafeFileHandle handle, uint request, out uint data);
 
-        [DllImport("libc", EntryPoint = "ioctl", SetLastError = true)]
-        public static extern int IOCtlWrite(SafeFileHandle handle, uint request, ref uint data); // Must be a ref, even though we don't need the result.
+        [LibraryImport("libc", EntryPoint = "ioctl", SetLastError = true)]
+        public static partial int IOCtlWrite(SafeFileHandle handle, uint request, ref uint data); // Must be a ref, even though we don't need the result.
 
-        [DllImport("libc", EntryPoint = "write", SetLastError = true)]
-        public static extern int Write(SafeFileHandle handle, byte[] data, int length);
+        [LibraryImport("libc", EntryPoint = "write", SetLastError = true)]
+        public static partial int Write(SafeFileHandle handle, [In]byte[] data, int length);
 
         [DllImport("libc", EntryPoint = "realpath", SetLastError = true, CharSet = CharSet.Ansi, BestFitMapping = false, ThrowOnUnmappableChar = true)]
         public static extern int RealPath(string fileName, System.Text.StringBuilder resolvedName);
 
-        [DllImport("libc", EntryPoint = "poll", SetLastError = true)]
-        public static extern int Poll([In, Out] pollfd[] fds, int fdsCount, int timeout);
+        [LibraryImport("libc", EntryPoint = "poll", SetLastError = true)]
+        public static partial int Poll([In, Out] pollfd[] fds, int fdsCount, int timeout);
 
         [Flags]
         public enum POLL_EVENTS : ushort
