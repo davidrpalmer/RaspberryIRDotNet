@@ -110,11 +110,11 @@ namespace RaspberryIRDotNet.PacketFormats.BinaryConverters
         {
             if (!bit) // 0
             {
-                return new byte[] { Zero_PulseUnitCount, Zero_SpaceUnitCount };
+                return [Zero_PulseUnitCount, Zero_SpaceUnitCount];
             }
             else // 1
             {
-                return new byte[] { One_PulseUnitCount, One_SpaceUnitCount };
+                return [One_PulseUnitCount, One_SpaceUnitCount];
             }
         }
     }

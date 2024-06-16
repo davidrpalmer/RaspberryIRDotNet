@@ -2,13 +2,8 @@
 
 namespace RaspberryIRDotNet.RX
 {
-    public class ExceptionEventArgs : EventArgs
+    public class ExceptionEventArgs(Exception exception) : EventArgs
     {
-        public ExceptionEventArgs(Exception exception)
-        {
-            Exception = exception ?? throw new ArgumentNullException(nameof(exception));
-        }
-
-        public Exception Exception { get; }
+        public Exception Exception { get; } = exception ?? throw new ArgumentNullException(nameof(exception));
     }
 }

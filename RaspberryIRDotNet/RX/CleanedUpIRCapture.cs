@@ -37,7 +37,7 @@ namespace RaspberryIRDotNet.RX
         /// </summary>
         public void SetLeadInPatternFilterByUnits(IReadOnlyPulseSpaceUnitList units)
         {
-            if (units == null) { throw new ArgumentNullException(); }
+            ArgumentNullException.ThrowIfNull(units);
 
             if (UnitDurationMicrosecs < Utility.UnitDurationMinimum)
             {

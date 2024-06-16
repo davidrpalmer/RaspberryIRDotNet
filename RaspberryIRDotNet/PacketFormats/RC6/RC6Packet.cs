@@ -19,7 +19,7 @@ namespace RaspberryIRDotNet.PacketFormats.RC6
             return "Mode:" + Mode.ToString();
         }
 
-        protected bool AreArraysEqual<T>(IList<T> a, IList<T> b)
+        protected static bool AreArraysEqual<T>(IList<T> a, IList<T> b)
         {
             if (a.Count != b.Count)
             {

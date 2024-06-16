@@ -20,8 +20,8 @@ namespace RaspberryIRDotNet.PacketFormats
 
         public FormatGuesser()
         {
-            Formats = new List<Format>()
-            {
+            Formats =
+            [
                 new Format()
                 {
                      Filter = new NEC.NecRxFilter(),
@@ -46,7 +46,7 @@ namespace RaspberryIRDotNet.PacketFormats
                      Converter = new RC6.RC6ModeReader(),
                      UnitDurationMicrosecs = RC6.RC6Converter.RC6StandardUnitDurationMicrosecs
                 },
-            };
+            ];
 
             foreach(var format in Formats)
             {

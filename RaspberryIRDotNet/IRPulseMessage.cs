@@ -45,10 +45,7 @@ namespace RaspberryIRDotNet
         /// <param name="unitDuration">How long each unit lasts, in microseconds. The input durations will be rounded to this.</param>
         public IRPulseMessage(IReadOnlyPulseSpaceDurationList pulsesAndSpacesAsDurations, int unitDuration)
         {
-            if (pulsesAndSpacesAsDurations == null)
-            {
-                throw new ArgumentNullException(nameof(pulsesAndSpacesAsDurations));
-            }
+            ArgumentNullException.ThrowIfNull(pulsesAndSpacesAsDurations);
             if (unitDuration < Utility.UnitDurationMinimum || unitDuration > Utility.UnitDurationMaximum)
             {
                 throw new ArgumentOutOfRangeException(nameof(unitDuration), unitDuration, "Unit duration is invalid.");
@@ -67,10 +64,7 @@ namespace RaspberryIRDotNet
         /// <param name="unitDuration">How long each unit lasts, in microseconds.</param>
         public IRPulseMessage(IReadOnlyPulseSpaceUnitList pulsesAndSpacesAsNumberOfUnits, int unitDuration)
         {
-            if (pulsesAndSpacesAsNumberOfUnits == null)
-            {
-                throw new ArgumentNullException(nameof(pulsesAndSpacesAsNumberOfUnits));
-            }
+            ArgumentNullException.ThrowIfNull(pulsesAndSpacesAsNumberOfUnits);
             if (unitDuration < Utility.UnitDurationMinimum || unitDuration > Utility.UnitDurationMaximum)
             {
                 throw new ArgumentOutOfRangeException(nameof(unitDuration), unitDuration, "Unit duration is invalid.");

@@ -34,24 +34,23 @@ namespace RaspberryIRDotNet.DeviceAssessment
         public AssessmentResult AssessDevice(string path)
         {
             string fullPath = _fileSystem.GetFullPath(path);
-            using (var irDevice = _fileSystem.OpenRead(fullPath))
+            using var irDevice = _fileSystem.OpenRead(fullPath);
+
+            DeviceFeatures features = Utility.GetFeatures(irDevice); /// If this is not an IR device then expect a <see cref="NotAnIRDeviceException"/> exception from this.
+
+            string realPath = _fileSystem.GetRealPath(fullPath);
+
+            uint? minTimeOut = null;
+            uint? maxTimeOut = null;
+            uint? currentTimeOut = null;
+            if (features.CanReceive()) // Only try this query for receive devices since it is not applicable to transmit devices so is very unlikely to work.
             {
-                DeviceFeatures features = Utility.GetFeatures(irDevice); /// If this is not an IR device then expect a <see cref="NotAnIRDeviceException"/> exception from this.
-
-                string realPath = _fileSystem.GetRealPath(fullPath);
-
-                uint? minTimeOut = null;
-                uint? maxTimeOut = null;
-                uint? currentTimeOut = null;
-                if (features.CanReceive()) // Only try this query for receive devices since it is not applicable to transmit devices so is very unlikely to work.
-                {
-                    minTimeOut = GetIoCtlValueIfImplemented(irDevice, LircConstants.LIRC_GET_MIN_TIMEOUT);
-                    maxTimeOut = GetIoCtlValueIfImplemented(irDevice, LircConstants.LIRC_GET_MAX_TIMEOUT);
-                    currentTimeOut = GetIoCtlValueIfImplemented(irDevice, LircConstants.LIRC_GET_REC_TIMEOUT);
-                }
-
-                return new AssessmentResult(fullPath, realPath, features, minTimeOut, maxTimeOut, currentTimeOut);
+                minTimeOut = GetIoCtlValueIfImplemented(irDevice, LircConstants.LIRC_GET_MIN_TIMEOUT);
+                maxTimeOut = GetIoCtlValueIfImplemented(irDevice, LircConstants.LIRC_GET_MAX_TIMEOUT);
+                currentTimeOut = GetIoCtlValueIfImplemented(irDevice, LircConstants.LIRC_GET_REC_TIMEOUT);
             }
+
+            return new AssessmentResult(fullPath, realPath, features, minTimeOut, maxTimeOut, currentTimeOut);
         }
 
         private uint? GetIoCtlValueIfImplemented(FileSystem.IOpenFile irDevice, uint requestCode)
@@ -76,7 +75,7 @@ namespace RaspberryIRDotNet.DeviceAssessment
             {
                 throw new System.IO.DirectoryNotFoundException("Cannot find the /dev folder.");
             }
-            System.IO.EnumerationOptions options = new System.IO.EnumerationOptions()
+            System.IO.EnumerationOptions options = new()
             {
                 MatchCasing = System.IO.MatchCasing.CaseInsensitive,
                 MatchType = System.IO.MatchType.Simple,

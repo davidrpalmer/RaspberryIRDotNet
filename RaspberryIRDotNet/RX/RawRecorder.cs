@@ -43,7 +43,7 @@ namespace RaspberryIRDotNet.RX
         /// </summary>
         public event EventHandler<ProgressEventArgs> Filtered;
 
-        private readonly IDebounceTimer _debounceTimer = new DebounceTimer(TimeSpan.FromMilliseconds(400));
+        private readonly DebounceTimer _debounceTimer = new(TimeSpan.FromMilliseconds(400));
 
         private PreRecordedSource _captured;
 

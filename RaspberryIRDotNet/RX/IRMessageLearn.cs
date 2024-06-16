@@ -72,7 +72,7 @@ namespace RaspberryIRDotNet.RX
         /// </summary>
         public IRPulseMessage LearnMessage()
         {
-            List<IRPulseMessage> allCaptues = new List<IRPulseMessage>();
+            List<IRPulseMessage> allCaptues = new(64); // 64 is an arbitary number that should be more than enough to capture everything without needing to grow the List.
             while (true)
             {
                 Waiting?.Invoke(this, EventArgs.Empty);

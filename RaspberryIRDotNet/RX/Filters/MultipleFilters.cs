@@ -9,7 +9,7 @@ namespace RaspberryIRDotNet.RX.Filters
         /// <summary>
         /// If one or more of these filters blocks IR then it won't pass. If none block it then it will pass.
         /// </summary>
-        public List<IRXFilter> Filters { get; set; } = new List<IRXFilter>();
+        public List<IRXFilter> Filters { get; set; } = [];
 
         /// <summary>
         /// Define if having 0 filters will cause <see cref="AssertConfigOK"/> to throw.

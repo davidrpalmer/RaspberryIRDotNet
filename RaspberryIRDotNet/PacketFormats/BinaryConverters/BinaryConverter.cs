@@ -14,7 +14,7 @@ namespace RaspberryIRDotNet.PacketFormats.BinaryConverters
 
         protected bool HasLeadIn(IReadOnlyPulseSpaceUnitList input)
         {
-            if (input == null) { throw new ArgumentNullException(nameof(input)); }
+            ArgumentNullException.ThrowIfNull(input);
 
             if (_leadInPattern == null || _leadInPattern.Count < 1)
             {

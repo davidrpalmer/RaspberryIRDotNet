@@ -9,6 +9,9 @@ namespace RaspberryIRDotNet
     /// </summary>
     public class PulseSpaceUnitList : List<byte>, IReadOnlyPulseSpaceUnitList
     {
+        private static readonly char[] _stringSplitArgument = [_stringseparatorChar];
+        private const char _stringseparatorChar = ',';
+
         public PulseSpaceUnitList()
         {
         }
@@ -77,20 +80,17 @@ namespace RaspberryIRDotNet
 
         public string SaveToString()
         {
-            return string.Join(',', this);
+            return string.Join(_stringseparatorChar, this);
         }
 
         public static PulseSpaceUnitList LoadFromString(string text)
         {
-            if (text == null)
-            {
-                throw new ArgumentNullException(nameof(text));
-            }
+            ArgumentNullException.ThrowIfNull(text);
 
-            IEnumerable<byte> pulsesAndSpacesUnitCount = text.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+            IEnumerable<byte> pulsesAndSpacesUnitCount = text.Split(_stringSplitArgument, StringSplitOptions.RemoveEmptyEntries)
                 .Select(s => s.Trim())
                 .Where(s => !string.IsNullOrEmpty(s))
-                .Select(s => byte.Parse(s));
+                .Select(byte.Parse);
 
             return new PulseSpaceUnitList(pulsesAndSpacesUnitCount);
         }

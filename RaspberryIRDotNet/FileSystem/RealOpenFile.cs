@@ -18,7 +18,7 @@ namespace RaspberryIRDotNet.FileSystem
 
         public RealOpenFile(FileStream fileStream)
         {
-            _fileStream = fileStream ?? throw new ArgumentNullException();
+            _fileStream = fileStream ?? throw new ArgumentNullException(nameof(fileStream));
         }
 
         protected virtual void Dispose(bool disposing)
@@ -50,14 +50,8 @@ namespace RaspberryIRDotNet.FileSystem
         /// </summary>
         public void WriteToDevice(byte[] buffer)
         {
-            if (buffer == null)
-            {
-                throw new ArgumentNullException(nameof(buffer));
-            }
-            if (_disposedValue)
-            {
-                throw new ObjectDisposedException(nameof(RealOpenFile));
-            }
+            ArgumentNullException.ThrowIfNull(buffer);
+            ObjectDisposedException.ThrowIf(_disposedValue, this);
             if (!_fileStream.CanWrite)
             {
                 throw new InvalidOperationException("Device not opened for writing.");
@@ -76,18 +70,9 @@ namespace RaspberryIRDotNet.FileSystem
 
         public int ReadFromDevice(byte[] buffer, ReadCancellationToken cancellationToken)
         {
-            if (buffer == null)
-            {
-                throw new ArgumentNullException(nameof(buffer));
-            }
-            if (cancellationToken == null)
-            {
-                throw new ArgumentNullException(nameof(cancellationToken));
-            }
-            if (_disposedValue)
-            {
-                throw new ObjectDisposedException(nameof(RealOpenFile));
-            }
+            ArgumentNullException.ThrowIfNull(buffer);
+            ArgumentNullException.ThrowIfNull(cancellationToken);
+            ObjectDisposedException.ThrowIf(_disposedValue, this);
             if (!_fileStream.CanRead)
             {
                 throw new InvalidOperationException("Device not opened for reading.");
@@ -129,19 +114,19 @@ namespace RaspberryIRDotNet.FileSystem
 
         private int ReadFromDeviceInner(byte[] buffer, ReadCancellationToken cancellationToken)
         {
-            Native.pollfd[] fds = new Native.pollfd[]
-            {
-                new Native.pollfd()
+            Native.pollfd[] fds =
+            [
+                new()
                 {
                     fd = _pipeClient.SafePipeHandle.DangerousGetHandle().ToInt32(),
                     events = Native.POLL_EVENTS.POLLIN
                 },
-                new Native.pollfd()
+                new()
                 {
                     fd = _fileStream.SafeFileHandle.DangerousGetHandle().ToInt32(),
                     events = Native.POLL_EVENTS.POLLIN
                 }
-            };
+            ];
 
             while (true)
             {
@@ -182,7 +167,7 @@ namespace RaspberryIRDotNet.FileSystem
             ThrowIfIOError(ioCtlResult);
         }
 
-        private void ThrowIfIOError(int returnCode)
+        private static void ThrowIfIOError(int returnCode)
         {
             if (returnCode < 0)
             {

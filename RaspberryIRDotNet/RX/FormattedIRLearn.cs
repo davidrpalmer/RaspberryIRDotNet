@@ -84,7 +84,7 @@ namespace RaspberryIRDotNet.RX
                 throw new ArgumentNullException(nameof(PacketConverter));
             }
 
-            List<TPacket> allCaptues = new List<TPacket>();
+            List<TPacket> allCaptues = new(32); // 32 is an arbitary number that should be more than enough to capture everything without needing to grow the List.
             while (true)
             {
                 RaiseWaitingEvent();

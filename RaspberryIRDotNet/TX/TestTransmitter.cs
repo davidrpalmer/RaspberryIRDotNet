@@ -17,7 +17,7 @@ namespace RaspberryIRDotNet.TX
 
         private bool _keepGoing = false;
 
-        private readonly object _startStopLocker = new object();
+        private readonly object _startStopLocker = new();
 
         /// <summary>
         /// The data to transmit, or null to use default data. This object must not be modified while transmitting, although it may be replaced either before or while transmitting.

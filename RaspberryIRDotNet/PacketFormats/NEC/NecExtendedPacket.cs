@@ -31,7 +31,7 @@ namespace RaspberryIRDotNet.PacketFormats.NEC
 
         public void FromBytes(IReadOnlyList<byte> data)
         {
-            if (data == null) { throw new ArgumentNullException(); }
+            ArgumentNullException.ThrowIfNull(data);
             if (data.Count != 4) { throw new Exceptions.InvalidPacketDataException($"Data length must be 4, but was {data.Count}."); }
 
             Address = data[0];
@@ -50,13 +50,13 @@ namespace RaspberryIRDotNet.PacketFormats.NEC
                 address2 = (byte)((Address & 0xFF00) >> 8);
             }
 
-            return new byte[]
-            {
+            return
+            [
                 address1,
                 address2,
                 Command,
                 Command_Inverse
-            };
+            ];
         }
 
         public override string ToString()

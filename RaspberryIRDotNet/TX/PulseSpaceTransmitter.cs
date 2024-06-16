@@ -35,7 +35,7 @@ namespace RaspberryIRDotNet.TX
             _fileSystem = newFS;
         }
 
-        protected void WriteToDevice(FileSystem.IOpenFile file, IReadOnlyPulseSpaceDurationList buffer)
+        protected static void WriteToDevice(FileSystem.IOpenFile file, IReadOnlyPulseSpaceDurationList buffer)
         {
             byte[] txBytesBuffer = GetTxBytes(buffer);
             try
@@ -82,7 +82,7 @@ namespace RaspberryIRDotNet.TX
         /// <summary>
         /// Get bytes that must be sent to an IR device in order to transmit a buffer.
         /// </summary>
-        private byte[] GetTxBytes(IReadOnlyPulseSpaceDurationList buffer)
+        private static byte[] GetTxBytes(IReadOnlyPulseSpaceDurationList buffer)
         {
             const int bytesIn32BitInt = 4;
 
@@ -158,13 +158,13 @@ namespace RaspberryIRDotNet.TX
             }
         }
 
-        protected void SetDutyCycle(FileSystem.IOpenFile irDevice, int cycle)
+        protected static void SetDutyCycle(FileSystem.IOpenFile irDevice, int cycle)
         {
-            if (cycle < 0) { throw new ArgumentOutOfRangeException(); }
+            ArgumentOutOfRangeException.ThrowIfNegative(cycle);
             SetDutyCycle(irDevice, checked((uint)cycle));
         }
 
-        protected void SetDutyCycle(FileSystem.IOpenFile irDevice, uint cycle)
+        protected static void SetDutyCycle(FileSystem.IOpenFile irDevice, uint cycle)
         {
             try
             {
@@ -176,12 +176,12 @@ namespace RaspberryIRDotNet.TX
             }
         }
 
-        protected void SetFrequency(FileSystem.IOpenFile irDevice, int frequency)
+        protected static void SetFrequency(FileSystem.IOpenFile irDevice, int frequency)
         {
-            if (frequency < 0) { throw new ArgumentOutOfRangeException(); }
+            ArgumentOutOfRangeException.ThrowIfNegative(frequency);
             SetFrequency(irDevice, checked((uint)frequency));
         }
-        protected void SetFrequency(FileSystem.IOpenFile irDevice, uint frequency)
+        protected static void SetFrequency(FileSystem.IOpenFile irDevice, uint frequency)
         {
             try
             {

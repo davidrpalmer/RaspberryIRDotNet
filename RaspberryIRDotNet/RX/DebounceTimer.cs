@@ -16,7 +16,7 @@ namespace RaspberryIRDotNet.RX
 
         public virtual bool ReadyToDoAnother => _timeSinceLastCapture.Elapsed > _debounceTime;
 
-        private readonly Stopwatch _timeSinceLastCapture = new Stopwatch();
+        private readonly Stopwatch _timeSinceLastCapture = new();
 
         public void Restart()
         {

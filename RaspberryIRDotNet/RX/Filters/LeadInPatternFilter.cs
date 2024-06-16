@@ -14,7 +14,7 @@ namespace RaspberryIRDotNet.RX.Filters
         /// </summary>
         public double LeadInErrorPercentage { get => _helper.LeadInErrorPercentage; set => _helper.LeadInErrorPercentage = value; }
 
-        private readonly RXFilterHelper _helper = new RXFilterHelper();
+        private readonly RXFilterHelper _helper = new();
 
         public LeadInPatternFilter()
         {

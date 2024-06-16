@@ -11,7 +11,7 @@ namespace RaspberryIRDotNet.RX.PulseSpaceSource
     /// </remarks>
     public class PreRecordedSource : IPulseSpaceSource
     {
-        public List<IReadOnlyPulseSpaceDurationList> Bursts { get; set; } = new List<IReadOnlyPulseSpaceDurationList>();
+        public List<IReadOnlyPulseSpaceDurationList> Bursts { get; set; } = [];
 
         public bool RealTime => false;
 

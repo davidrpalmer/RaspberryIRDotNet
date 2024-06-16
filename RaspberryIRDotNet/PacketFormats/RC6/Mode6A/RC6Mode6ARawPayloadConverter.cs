@@ -72,7 +72,7 @@ namespace RaspberryIRDotNet.PacketFormats.RC6.Mode6A
             return ToPacket(basicPacket, payload);
         }
 
-        private RC6Packet ToPacket(RC6Packet basicPacket, List<bool> payload)
+        private static RC6Packet ToPacket(RC6Packet basicPacket, List<bool> payload)
         {
             if (basicPacket is RC6Mode6A8Packet basic8Packet)
             {

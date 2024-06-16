@@ -38,8 +38,7 @@ namespace RaspberryIRDotNet.PacketFormats.BinaryConverters
                 throw new Exceptions.InvalidPacketDataException("The IR data length is invalid. It must start and end with a PULSE.");
             }
 
-            List<bool> binary = new List<bool>();
-
+            List<bool> binary = new(((lastPulseIndex - startAtIndex) / 2) + 1);
             for (int i = startAtIndex; i <= lastPulseIndex; i += 2)
             {
                 binary.Add(_pulseSpacePairBitConverter.PulseSpaceToBit(irPulseSpaceList[i], irPulseSpaceList[i + 1]));
@@ -54,7 +53,7 @@ namespace RaspberryIRDotNet.PacketFormats.BinaryConverters
 
         private PulseSpaceUnitList ToIR(bool[] bits)
         {
-            PulseSpaceUnitList pulseSpace = new PulseSpaceUnitList((bits.Length * 2) + _leadInPattern.Count);
+            PulseSpaceUnitList pulseSpace = new((bits.Length * 2) + _leadInPattern.Count);
             pulseSpace.AddRange(_leadInPattern);
             foreach (var bit in bits)
             {

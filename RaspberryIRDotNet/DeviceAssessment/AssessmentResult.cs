@@ -61,7 +61,7 @@ namespace RaspberryIRDotNet.DeviceAssessment
 
         public string WriteToString(string indent = _defaultIndent)
         {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
             WriteToString(text => sb.AppendLine(text), indent);
             return sb.ToString();
         }

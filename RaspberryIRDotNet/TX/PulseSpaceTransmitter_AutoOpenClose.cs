@@ -14,10 +14,8 @@ namespace RaspberryIRDotNet.TX
 
         public void Send(IReadOnlyPulseSpaceDurationList buffer)
         {
-            using (var irDevice = OpenDevice())
-            {
-                WriteToDevice(irDevice, buffer);
-            }
+            using var irDevice = OpenDevice();
+            WriteToDevice(irDevice, buffer);
         }
     }
 }

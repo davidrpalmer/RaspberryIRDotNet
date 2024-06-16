@@ -7,9 +7,9 @@ namespace RaspberryIRDotNet.RX
     {
         private int _refCount = 0;
 
-        private readonly object _locker = new object();
+        private readonly object _locker = new();
 
-        private readonly object _waitLocker = new object();
+        private readonly object _waitLocker = new();
 
         private ManualResetEventSlim _zeroRefWaiter;
 
@@ -51,10 +51,7 @@ namespace RaspberryIRDotNet.RX
 
         public void CancelAfter(TimeSpan timeout)
         {
-            if (timeout < TimeSpan.Zero)
-            {
-                throw new ArgumentOutOfRangeException(nameof(timeout));
-            }
+            ArgumentOutOfRangeException.ThrowIfLessThan(timeout, TimeSpan.Zero);
             System.Threading.Tasks.Task.Delay(timeout).ContinueWith((t) => Cancel(wait: false));
         }
 

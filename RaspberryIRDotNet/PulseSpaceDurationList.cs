@@ -42,10 +42,7 @@ namespace RaspberryIRDotNet
         /// </summary>
         public PulseSpaceDurationList Copy(int roundTo)
         {
-            if (roundTo <= 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(roundTo));
-            }
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(roundTo);
 
             var copy = new PulseSpaceDurationList(Count);
             foreach (var original in this)
@@ -78,10 +75,7 @@ namespace RaspberryIRDotNet
 
         public bool IsWithinPercent(int index, int expected, double percentage)
         {
-            if (percentage < 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(percentage));
-            }
+            ArgumentOutOfRangeException.ThrowIfNegative(percentage);
 
             var errorMargin = (int) Math.Round(expected * percentage, 0);
 

@@ -10,7 +10,7 @@ namespace RaspberryIRDotNet.RX
     /// </summary>
     public class LeadInLearner
     {
-        private readonly List<PulseSpaceDurationList> _received = new List<PulseSpaceDurationList>();
+        private readonly List<PulseSpaceDurationList> _received = [];
 
         /// <summary>
         /// How many captures must be the same before we believe they accurately represent the lead-in pattern.
