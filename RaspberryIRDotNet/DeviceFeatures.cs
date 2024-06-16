@@ -47,11 +47,6 @@ namespace RaspberryIRDotNet
         SetReceiveCarrier = LIRC_CAN_SET_REC_CARRIER,
 
         /// <summary>
-        /// The driver supports LIRC_SET_REC_DUTY_CYCLE_RANGE.
-        /// </summary>
-        SetReceiveDutyCycleRange = LIRC_CAN_SET_REC_DUTY_CYCLE_RANGE,
-
-        /// <summary>
         /// The driver supports LIRC_SET_REC_CARRIER_RANGE.
         /// </summary>
         SetReceiveCarrierRange = LIRC_CAN_SET_REC_CARRIER_RANGE,
@@ -67,11 +62,6 @@ namespace RaspberryIRDotNet
         SetReceiveTimeout = LIRC_CAN_SET_REC_TIMEOUT,
 
         /// <summary>
-        /// The driver supports LIRC_SET_REC_FILTER.
-        /// </summary>
-        SetReceiveFilter = LIRC_CAN_SET_REC_FILTER,
-
-        /// <summary>
         /// The driver supports measuring of the modulation frequency using LIRC_SET_MEASURE_CARRIER_MODE.
         /// </summary>
         MeasureCarrier = LIRC_CAN_MEASURE_CARRIER,
@@ -80,11 +70,6 @@ namespace RaspberryIRDotNet
         /// The driver supports learning mode using LIRC_SET_WIDEBAND_RECEIVER.
         /// </summary>
         UseWidebandReceiver = LIRC_CAN_USE_WIDEBAND_RECEIVER,
-
-        /// <summary>
-        /// The driver supports LIRC_NOTIFY_DECODE.
-        /// </summary>
-        NotifyDecode = LIRC_CAN_NOTIFY_DECODE,
 
         /// <summary>
         /// The driver supports sending using LIRC_MODE_RAW.
