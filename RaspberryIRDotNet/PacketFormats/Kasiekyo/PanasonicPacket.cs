@@ -38,7 +38,7 @@ namespace RaspberryIRDotNet.PacketFormats.Kasiekyo
 
         public void FromBytes(IReadOnlyList<byte> data)
         {
-            if (data == null) { throw new ArgumentNullException(); }
+            ArgumentNullException.ThrowIfNull(data);
             if (data.Count != 6) { throw new Exceptions.InvalidPacketDataException($"Data length must be 6, but was {data.Count}."); }
 
             Manufacturer = data[0];
@@ -59,15 +59,15 @@ namespace RaspberryIRDotNet.PacketFormats.Kasiekyo
                 man2 = (byte)((Manufacturer & 0xFF00) >> 8);
             }
 
-            return new byte[]
-            {
+            return
+            [
                 man1,
                 man2,
                 Device,
                 SubDevice,
                 Function,
                 Hash
-            };
+            ];
         }
 
         public void SetCalculatedValues()

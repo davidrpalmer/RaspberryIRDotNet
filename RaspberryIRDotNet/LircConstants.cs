@@ -16,6 +16,7 @@ namespace RaspberryIRDotNet
         //public const uint LIRC_MODE2_PULSE = 0x01000000;
         //public const uint LIRC_MODE2_FREQUENCY = 0x02000000;
         //public const uint LIRC_MODE2_TIMEOUT = 0x03000000;
+        //public const uint LIRC_MODE2_OVERFLOW = 0x04000000;
 
 
         public const uint LIRC_VALUE_MASK = 0x00ffffff;
@@ -44,15 +45,11 @@ namespace RaspberryIRDotNet
         public const uint LIRC_CAN_REC_LIRCCODE = 0x00100000;
         public const uint LIRC_CAN_REC_MASK = 0x003f0000;
         public const uint LIRC_CAN_SET_REC_CARRIER = 0x01000000;
-        public const uint LIRC_CAN_SET_REC_DUTY_CYCLE = 0x02000000;
-        public const uint LIRC_CAN_SET_REC_DUTY_CYCLE_RANGE = 0x40000000;
         public const uint LIRC_CAN_SET_REC_CARRIER_RANGE = 0x80000000;
         public const uint LIRC_CAN_GET_REC_RESOLUTION = 0x20000000;
         public const uint LIRC_CAN_SET_REC_TIMEOUT = 0x10000000;
-        public const uint LIRC_CAN_SET_REC_FILTER = 0x08000000;
         public const uint LIRC_CAN_MEASURE_CARRIER = 0x02000000;
         public const uint LIRC_CAN_USE_WIDEBAND_RECEIVER = 0x04000000;
-        public const uint LIRC_CAN_NOTIFY_DECODE = 0x01000000;
 
         // IO CTL requests.
         public const uint LIRC_GET_FEATURES = 0x80046900;

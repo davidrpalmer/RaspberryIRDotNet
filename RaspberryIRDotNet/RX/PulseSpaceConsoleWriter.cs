@@ -37,7 +37,7 @@ namespace RaspberryIRDotNet.RX
             {
                 string type = pulse ? "PULSE" : "SPACE";
 
-                ConsoleWriteLine($"{type} {item.ToString().PadLeft(5)}");
+                ConsoleWriteLine($"{type} {item,5}");
 
                 pulse = !pulse;
             }

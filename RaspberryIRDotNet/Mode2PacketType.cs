@@ -7,6 +7,7 @@ namespace RaspberryIRDotNet
         Space = 0,
         Pulse = 1,
         Frequency = 2,
-        Timeout = 3
+        Timeout = 3,
+        Overflow = 4,
     }
 }

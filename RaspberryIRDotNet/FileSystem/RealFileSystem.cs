@@ -13,10 +13,10 @@ namespace RaspberryIRDotNet.FileSystem
 
         public string GetRealPath(string linkPath)
         {
-            StringBuilder realPath = new StringBuilder();
+            StringBuilder realPath = new();
             if (Native.RealPath(linkPath, realPath) == 0)
             {
-                ThrowLastNativeError();
+                throw new System.ComponentModel.Win32Exception();
             }
             return realPath.ToString();
         }
@@ -29,12 +29,6 @@ namespace RaspberryIRDotNet.FileSystem
         public IOpenFile OpenWrite(string path)
         {
             return new RealOpenFile(File.Open(path, FileMode.Open, FileAccess.Write));
-        }
-
-        private void ThrowLastNativeError()
-        {
-            int lastError = System.Runtime.InteropServices.Marshal.GetLastWin32Error();
-            throw new System.ComponentModel.Win32Exception(lastError); // The even though the name is Win32 this exception actually works for Linux and gives the right messages.
         }
     }
 }

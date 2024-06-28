@@ -20,7 +20,7 @@ namespace RaspberryIRDotNet.RX.PulseSpaceSource
 
         public bool RealTime => true;
 
-        private readonly PulseSpaceDurationList _pulseSpaceBuffer = new PulseSpaceDurationList(100);
+        private readonly PulseSpaceDurationList _pulseSpaceBuffer = new(100);
 
         public event EventHandler<ReceivedPulseSpaceBurstEventArgs> ReceivedPulseSpaceBurst;
 

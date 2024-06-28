@@ -15,15 +15,8 @@ namespace RaspberryIRDotNet.PacketFormats
     {
         public List<bool> FromIR(IReadOnlyPulseSpaceUnitList irData, int startAtIndex = 0)
         {
-            if (irData == null)
-            {
-                throw new ArgumentNullException(nameof(irData));
-            }
-
-            if (startAtIndex < 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(startAtIndex));
-            }
+            ArgumentNullException.ThrowIfNull(irData);
+            ArgumentOutOfRangeException.ThrowIfNegative(startAtIndex);
 
             var result = new List<bool>();
 

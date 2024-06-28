@@ -29,7 +29,7 @@ namespace RaspberryIRDotNet.RX.PulseSpaceSource
 
         public FilterPulseSpaceSource(IPulseSpaceSource source, IEnumerable<IRXFilter> filters)
         {
-            _source = source ?? throw new ArgumentNullException();
+            _source = source ?? throw new ArgumentNullException(nameof(source));
             _source.ReceivedPulseSpaceBurst += OnReceivedPulseSpaceBurst;
 
             if (filters?.Any() == true)

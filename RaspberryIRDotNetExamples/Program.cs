@@ -5,8 +5,8 @@ namespace RaspberryIRDotNetExamples
 {
     class Program
     {
-        private static readonly Demo[] _demos = new Demo[]
-        {
+        private static readonly Demo[] _demos =
+        [
             new IRDevListing(),
             new ScopeToy(),
             new RXLogger(),
@@ -16,7 +16,7 @@ namespace RaspberryIRDotNetExamples
             new LearnAKey(),
             new LogDecodedPackets(),
             new FormatSender(),
-        };
+        ];
 
         static void Main(string[] args)
         {

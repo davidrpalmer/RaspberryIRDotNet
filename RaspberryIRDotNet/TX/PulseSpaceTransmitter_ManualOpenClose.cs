@@ -43,10 +43,7 @@ namespace RaspberryIRDotNet.TX
             _openDeviceHandle = null;
         }
 
-        protected void AssertNotDisposed()
-        {
-            if (Disposed) { throw new ObjectDisposedException(nameof(PulseSpaceTransmitter_ManualOpenClose)); }
-        }
+        protected void AssertNotDisposed() => ObjectDisposedException.ThrowIf(Disposed, this);
 
         protected void AssertOpen()
         {
@@ -80,6 +77,7 @@ namespace RaspberryIRDotNet.TX
         public void Dispose()
         {
             Dispose(true);
+            GC.SuppressFinalize(this);
         }
         #endregion
     }

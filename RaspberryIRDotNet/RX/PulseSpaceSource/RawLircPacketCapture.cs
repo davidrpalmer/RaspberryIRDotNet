@@ -9,7 +9,7 @@ namespace RaspberryIRDotNet.RX.PulseSpaceSource
     {
         private readonly FileSystem.IFileSystem _fileSystem;
 
-        private readonly object _capturingLocker = new object();
+        private readonly object _capturingLocker = new();
 
         /// <summary>
         /// The IR capture device, example '/dev/lirc0'.
@@ -29,7 +29,7 @@ namespace RaspberryIRDotNet.RX.PulseSpaceSource
         /// <summary>
         /// When the device is opened this is called to check that the device is OK (e.g. has the right capabilities, etc).
         /// </summary>
-        private void CheckDevice(FileSystem.IOpenFile irDevice, DeviceFeatures deviceFeatures)
+        private static void CheckDevice(FileSystem.IOpenFile irDevice, DeviceFeatures deviceFeatures)
         {
             if (!deviceFeatures.CanReceive())
             {

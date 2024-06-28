@@ -110,9 +110,9 @@ namespace RaspberryIRDotNet.RX
             return (int)smallSamples.Average();
         }
 
-        private IList<PulseSpaceDurationList> CaptureIR()
+        private List<PulseSpaceDurationList> CaptureIR()
         {
-            List<PulseSpaceDurationList> receivedMessages = new List<PulseSpaceDurationList>();
+            List<PulseSpaceDurationList> receivedMessages = new(Math.Min(512, TargetCaptures)); // If target is a very large value then maybe the intention is to stop it by some other means. So don't allocate huge amounts of memory.
             while (receivedMessages.Count < TargetCaptures)
             {
                 Waiting?.Invoke(this, EventArgs.Empty);

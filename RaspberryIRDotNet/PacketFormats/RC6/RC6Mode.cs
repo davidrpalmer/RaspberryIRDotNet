@@ -2,7 +2,7 @@
 
 namespace RaspberryIRDotNet.PacketFormats.RC6
 {
-    public struct RC6Mode : IEquatable<RC6Mode>, IEquatable<byte>, IEquatable<int>
+    public readonly struct RC6Mode : IEquatable<RC6Mode>, IEquatable<byte>, IEquatable<int>
     {
         private readonly byte _value;
 
@@ -16,7 +16,7 @@ namespace RaspberryIRDotNet.PacketFormats.RC6
         }
 
         public static implicit operator byte(RC6Mode mode) => mode._value;
-        public static explicit operator RC6Mode(byte value) => new RC6Mode(value);
+        public static explicit operator RC6Mode(byte value) => new(value);
 
         public override string ToString() => _value.ToString();
 

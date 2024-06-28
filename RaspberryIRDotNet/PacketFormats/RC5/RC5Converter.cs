@@ -7,8 +7,8 @@ namespace RaspberryIRDotNet.PacketFormats.RC5
 {
     public class RC5Converter : IPulseSpacePacketConverter<RC5BasicPacket>, IPulseSpacePacketConverter<RC5ExtendedPacket>
     {
-        private readonly PointInTimeSampler _pointInTimeSampler = new PointInTimeSampler();
-        protected readonly MostSignificantFirstBitByteConverter _bitByteConverter = new MostSignificantFirstBitByteConverter();
+        private readonly PointInTimeSampler _pointInTimeSampler = new();
+        protected readonly MostSignificantFirstBitByteConverter _bitByteConverter = new();
 
         public static int RC5StandardUnitDurationMicrosecs { get; } = 889;
 
@@ -75,7 +75,7 @@ namespace RaspberryIRDotNet.PacketFormats.RC5
             return ToIR(allBits);
         }
 
-        private PulseSpaceUnitList ToIR(IEnumerable<bool> allBits)
+        private static PulseSpaceUnitList ToIR(IEnumerable<bool> allBits)
         {
             var result = new PulseSpaceUnitList();
 
@@ -179,21 +179,21 @@ namespace RaspberryIRDotNet.PacketFormats.RC5
             packet.Address = BitsToByte(bits, addressStartAt, addressBitCount);
 
             // The command is the 2nd start bit (which we actually have as the first bit since we ignore the 1st bit) then 6 bits from the end of the IR signal.
-            List<bool> commandBits = new List<bool>(bits.GetRange(addressStartAt + addressBitCount, 6));
+            List<bool> commandBits = new(bits.GetRange(addressStartAt + addressBitCount, 6));
             commandBits.Insert(0, !bits[0]); // Must invert the first bit.
             packet.Command = BitsToByte(commandBits, 0, commandBits.Count);
 
             return packet;
         }
 
-        protected List<bool> HighLowSamplesToBits(IReadOnlyList<bool> highLowSamples)
+        protected static List<bool> HighLowSamplesToBits(IReadOnlyList<bool> highLowSamples)
         {
-            List<bool> bits = new List<bool>();
+            List<bool> bits = new(highLowSamples.Count / 2);
 
             for (int i = 1; i < highLowSamples.Count; i += 2)
             {
                 var first = highLowSamples[i];
-                bool? second = i >= (highLowSamples.Count - 1) ? (bool?)null : highLowSamples[i + 1];
+                bool? second = i >= (highLowSamples.Count - 1) ? null : highLowSamples[i + 1];
 
                 if (!first && second == true)
                 {

@@ -4,7 +4,7 @@ namespace RaspberryIRDotNet.RX.Filters
 {
     public class PulseSpaceCountFilter : IRXFilter
     {
-        private readonly RXFilterHelper _helper = new RXFilterHelper();
+        private readonly RXFilterHelper _helper = new();
 
         /// <summary>
         /// The minimum number of PULSEs and SPACEs. NULL to not check.

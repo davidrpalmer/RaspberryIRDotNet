@@ -20,8 +20,8 @@ namespace RaspberryIRDotNet.PacketFormats.RC6
         public static int RC6StandardFrequency { get; } = 36000;
 
 
-        private readonly PointInTimeSampler _pointInTimeSampler = new PointInTimeSampler();
-        protected readonly MostSignificantFirstBitByteConverter _bitByteConverter = new MostSignificantFirstBitByteConverter();
+        private readonly PointInTimeSampler _pointInTimeSampler = new();
+        protected readonly MostSignificantFirstBitByteConverter _bitByteConverter = new();
 
         protected PulseSpaceUnitList ToIR(RC6Mode mode, bool trailer, IEnumerable<bool> payloadBits)
         {
@@ -153,14 +153,14 @@ namespace RaspberryIRDotNet.PacketFormats.RC6
         /// <remarks>
         /// This assumes that the double width bit is the same for all RC6 modes (it is for modes 0 and 6).
         /// </remarks>
-        protected List<bool> HighLowSamplesToBits(IReadOnlyList<bool> highLowSamples)
+        protected static List<bool> HighLowSamplesToBits(IReadOnlyList<bool> highLowSamples)
         {
             if (highLowSamples.Count < 12) // Make sure we have at least up to the double width bit.
             {
                 throw new Exceptions.InvalidPacketDataException("Not enough IR samples for RC6.");
             }
 
-            List<bool> bits = new List<bool>();
+            List<bool> bits = new((highLowSamples.Count - 1) / 2); // It would be "Count - 2" to account for the double width bit. But we also want to add 1 so that rounding down works.
 
             for (int i = 0; i < highLowSamples.Count; i += 2)
             {
@@ -224,7 +224,7 @@ namespace RaspberryIRDotNet.PacketFormats.RC6
             return bits;
         }
 
-        protected byte[] UInt16ToBytes(ushort number)
+        protected static byte[] UInt16ToBytes(ushort number)
         {
             byte[] result = new byte[2];
             checked
@@ -235,7 +235,7 @@ namespace RaspberryIRDotNet.PacketFormats.RC6
             return result;
         }
 
-        protected ushort UInt16FromBytes(IList<byte> bytes)
+        protected static ushort UInt16FromBytes(IList<byte> bytes)
         {
             ushort result = bytes[1];
             result |= checked((ushort)(bytes[0] << 8));
